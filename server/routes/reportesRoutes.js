@@ -82,18 +82,18 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         });
 
       // marcador temporal (será reemplazado luego)
-      /*
-      const currentPage = doc.pageNumber;
+      
+      //const currentPage = doc.pageNumber;
       doc
         .font("Helvetica")
         .fontSize(9)
         .fillColor("#666")
-        .text(`Página ${currentPage} de __`, L, doc.y + 2, {
+        .text(`Ilustre Municipalidad de Curacaví`, L, doc.y + 2, {
           align: "left",
           width: usableWidth - 15,
         });
         
-        */
+        
 
       doc.moveDown(0.5);
       doc.font("Helvetica").fillColor("#000").fontSize(10);
