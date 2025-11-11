@@ -43,6 +43,7 @@ export default function Conductores() {
                 <th>N°</th>
                 <th>Nombre</th>
                 <th>Correo</th>
+                <th>Departamento</th>
                 <th>RUT</th>
                 <th>Dirección</th>
                 <th>Teléfono</th>
@@ -55,6 +56,7 @@ export default function Conductores() {
                   <td>{index + 1}</td>
                   <td>{c.nombre}</td>
                   <td>{c.correo || '-'}</td>
+                  <td>{c.departamento || '-'}</td>
                   <td>{c.rut || '-'}</td>
                   <td>{c.direccion || '-'}</td>
                   <td>{c.telefono || '-'}</td>
