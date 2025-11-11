@@ -9,6 +9,7 @@ import {
   Gear,
   PersonFillGear,
   PersonCircle,
+  Wrench,
 } from "react-bootstrap-icons";
 
 export default function NavbarLayout() {
@@ -90,7 +91,7 @@ export default function NavbarLayout() {
             </NavLink>
           )}
 
-          {/* --- Conductores, Vehículos, Reportes visibles para Conductor, Admin y Supervisor --- */}
+          {/* --- Conductores, Vehículos, Mantenciones, Reportes --- */}
           {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
             <>
               <NavLink
@@ -113,6 +114,18 @@ export default function NavbarLayout() {
                 }
               >
                 <Truck /> Vehículos
+              </NavLink>
+
+              {/* --- Nuevo Menú: Mantenciones --- */}
+              <NavLink
+                to="/mantenciones"
+                className={({ isActive }) =>
+                  `d-flex align-items-center gap-2 nav-link text-white ${
+                    isActive ? "fw-bold text-primary" : ""
+                  }`
+                }
+              >
+                <Wrench /> Mantenciones
               </NavLink>
 
               <NavLink
