@@ -53,7 +53,8 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         doc.page.width - doc.page.margins.left - doc.page.margins.right;
       try {
         const fsSync = require("fs");
-        if (fsSync.existsSync(logoPath)) doc.image(logoPath, L, 25, { width: 60 });
+        if (fsSync.existsSync(logoPath))
+          doc.image(logoPath, L, 25, { width: 60 });
       } catch {}
       doc
         .font("Helvetica-Bold")
@@ -62,7 +63,11 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         .text("MUNICIPALIDAD DE CURACAVÍ", L + 80, 30)
         .fontSize(10)
         .fillColor("#000")
-        .text("Dirección de Operaciones, Departamento de Movilización.", L + 80, 45);
+        .text(
+          "Dirección de Operaciones, Departamento de Movilización.",
+          L + 80,
+          45
+        );
       doc
         .moveTo(L, 65)
         .lineTo(L + usableWidth, 65)
@@ -88,7 +93,10 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
 
     // === DATOS DE INSPECCIÓN ===
     doc.moveDown(1.5);
-    doc.font("Helvetica-Bold").fillColor("#003366").text("Datos de la Inspección", L());
+    doc
+      .font("Helvetica-Bold")
+      .fillColor("#003366")
+      .text("Datos de la Inspección", L());
     doc.fillColor("#000").font("Helvetica").fontSize(10);
     doc.text(`ID Inspección: ${id}`);
     doc.text(`Vehículo: ${data.vehiculo}`);
@@ -96,17 +104,26 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     doc.moveDown(1);
 
     // === DATOS DEL CONDUCTOR ===
-    doc.font("Helvetica-Bold").fillColor("#003366").text("Datos del Conductor", L());
+    doc
+      .font("Helvetica-Bold")
+      .fillColor("#003366")
+      .text("Datos del Conductor", L());
     doc.fillColor("#000").font("Helvetica").fontSize(10);
     doc.text(`Conductor: ${data.conductor}`);
     if (data.rut_conductor) doc.text(`RUT: ${data.rut_conductor}`);
-    if (data.direccion_conductor) doc.text(`Dirección: ${data.direccion_conductor}`);
-    if (data.telefono_conductor) doc.text(`Teléfono: ${data.telefono_conductor}`);
-    if (data.licencia_conductor) doc.text(`Clase Licencia: ${data.licencia_conductor}`);
+    if (data.direccion_conductor)
+      doc.text(`Dirección: ${data.direccion_conductor}`);
+    if (data.telefono_conductor)
+      doc.text(`Teléfono: ${data.telefono_conductor}`);
+    if (data.licencia_conductor)
+      doc.text(`Clase Licencia: ${data.licencia_conductor}`);
     doc.moveDown(1);
 
     // === OBSERVACIONES ===
-    doc.font("Helvetica-Bold").fillColor("#003366").text("Observaciones Generales", L());
+    doc
+      .font("Helvetica-Bold")
+      .fillColor("#003366")
+      .text("Observaciones Generales", L());
     doc.moveDown(0.5).fillColor("#000");
     doc.text(data.observacion || "Sin observaciones registradas.");
     doc.moveDown(2);
@@ -119,7 +136,10 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         const tempPath = path.join("/tmp", `foto_${id}.jpg`);
         await fs.writeFile(tempPath, buffer);
 
-        doc.font("Helvetica-Bold").fillColor("#003366").text("Evidencia Fotográfica", L());
+        doc
+          .font("Helvetica-Bold")
+          .fillColor("#003366")
+          .text("Evidencia Fotográfica", L());
         const imgWidth = 250;
         const usableWidth =
           doc.page.width - doc.page.margins.left - doc.page.margins.right;
@@ -139,19 +159,57 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     );
 
     const baseItems = [
-      "Luces de estacionamiento","Luces bajas","Luces altas",
-      "Luz de freno (incluye tercera luz)","Luz de marcha atrás","Luz de viraje derecho",
-      "Luz de viraje izquierdo","Luz de emergencia","Luz de patente","Baliza",
-      "Freno de mano","Freno de pedal","Freno otros",
-      "Neumático delantero derecho","Neumático delantero izquierdo","Neumático trasero derecho",
-      "Neumático trasero izquierdo","Neumático de repuesto","Neumáticos otros",
-      "Aceite de motor","Agua del radiador","Líquido de freno","Correas","Agua de batería",
-      "Extintor","Botiquín","Gata","Llave de ruedas","Triángulos","Chaleco reflectante",
-      "Limpia parabrisas","Herramientas","Cinturón de seguridad","Espejos laterales",
-      "Espejo interior","Radiotransmisor","Bocina de retroceso","Antena",
-      "Permiso de circulación","Revisión técnica","Seguro obligatorio",
-      "Techo","Capot","Puertas","Vidrios","Tapabarros","Pick-up","Parachoques",
-      "Tubo de escape","Aseo de cabina","Sanitización COVID-19",
+      "Luces de estacionamiento",
+      "Luces bajas",
+      "Luces altas",
+      "Luz de freno (incluye tercera luz)",
+      "Luz de marcha atrás",
+      "Luz de viraje derecho",
+      "Luz de viraje izquierdo",
+      "Luz de emergencia",
+      "Luz de patente",
+      "Baliza",
+      "Freno de mano",
+      "Freno de pedal",
+      "Freno otros",
+      "Neumático delantero derecho",
+      "Neumático delantero izquierdo",
+      "Neumático trasero derecho",
+      "Neumático trasero izquierdo",
+      "Neumático de repuesto",
+      "Neumáticos otros",
+      "Aceite de motor",
+      "Agua del radiador",
+      "Líquido de freno",
+      "Correas",
+      "Agua de batería",
+      "Extintor",
+      "Botiquín",
+      "Gata",
+      "Llave de ruedas",
+      "Triángulos",
+      "Chaleco reflectante",
+      "Limpia parabrisas",
+      "Herramientas",
+      "Cinturón de seguridad",
+      "Espejos laterales",
+      "Espejo interior",
+      "Radiotransmisor",
+      "Bocina de retroceso",
+      "Antena",
+      "Permiso de circulación",
+      "Revisión técnica",
+      "Seguro obligatorio",
+      "Techo",
+      "Capot",
+      "Puertas",
+      "Vidrios",
+      "Tapabarros",
+      "Pick-up",
+      "Parachoques",
+      "Tubo de escape",
+      "Aseo de cabina",
+      "Sanitización COVID-19",
     ];
 
     const merged = baseItems.map((b) => {
@@ -166,7 +224,10 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
 
     // === TABLA ===
     doc.moveDown(10);
-    doc.font("Helvetica-Bold").fillColor("#003366").text("Ítems Inspeccionados", L());
+    doc
+      .font("Helvetica-Bold")
+      .fillColor("#003366")
+      .text("Ítems Inspeccionados", L());
     doc.moveDown(0.5).fillColor("#000");
 
     const startX = L();
@@ -176,7 +237,13 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     const rowHeight = 18;
 
     // CABECERA
-    doc.rect(startX, y, colWidths.reduce((a, b) => a + b), rowHeight)
+    doc
+      .rect(
+        startX,
+        y,
+        colWidths.reduce((a, b) => a + b),
+        rowHeight
+      )
       .fillAndStroke("#003366", "#003366");
     doc.fillColor("#FFF").font("Helvetica-Bold").fontSize(10);
     let x = startX;
@@ -194,7 +261,13 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         doc.addPage();
         drawHeader();
         y = doc.y + 20;
-        doc.rect(startX, y, colWidths.reduce((a, b) => a + b), rowHeight)
+        doc
+          .rect(
+            startX,
+            y,
+            colWidths.reduce((a, b) => a + b),
+            rowHeight
+          )
           .fillAndStroke("#003366", "#003366");
         doc.fillColor("#FFF").font("Helvetica-Bold").fontSize(10);
         let xh = startX;
@@ -207,38 +280,54 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
       }
 
       const fillColor = index % 2 === 0 ? "#F9F9F9" : "#FFFFFF";
-      doc.rect(startX, y, colWidths.reduce((a, b) => a + b), rowHeight)
+      doc
+        .rect(
+          startX,
+          y,
+          colWidths.reduce((a, b) => a + b),
+          rowHeight
+        )
         .fillAndStroke(fillColor, "#CCCCCC");
       x = startX;
-      doc.fillColor("#000").text(it.item_key, x + 5, y + 4, { width: colWidths[0] - 10 });
+      doc
+        .fillColor("#000")
+        .text(it.item_key, x + 5, y + 4, { width: colWidths[0] - 10 });
       x += colWidths[0];
       doc.text(it.existe, x + 5, y + 4, { width: colWidths[1] - 10 });
       x += colWidths[1];
       const color = it.estado === "Bueno" ? "#008000" : "#CC0000";
-      doc.fillColor(color).text(it.estado, x + 5, y + 4, { width: colWidths[2] - 10 });
+      doc
+        .fillColor(color)
+        .text(it.estado, x + 5, y + 4, { width: colWidths[2] - 10 });
       x += colWidths[2];
-      doc.fillColor("#000").text(it.obs || "-", x + 5, y + 4, { width: colWidths[3] - 10 });
+      doc
+        .fillColor("#000")
+        .text(it.obs || "-", x + 5, y + 4, { width: colWidths[3] - 10 });
       y += rowHeight;
     }
 
     // === FIRMAS ===
-    doc.moveDown(5);
+    doc.moveDown(1);
     const ySign = doc.page.height - 150;
     doc.font("Helvetica-Bold").fillColor("#000");
     doc.text("_____________________________", L(), ySign);
     doc.text(`Conductor: ${data.conductor}`, L() + 15, ySign + 12);
-    if (data.rut_conductor) doc.text(`RUT: ${data.rut_conductor}`, L() + 15, ySign + 24);
+    if (data.rut_conductor)
+      doc.text(`RUT: ${data.rut_conductor}`, L() + 15, ySign + 24);
     doc.text("_____________________________", L() + 260, ySign);
     doc.text("Supervisor:", L() + 270, ySign + 12);
 
     // === PIE DE PÁGINA ===
     const footerY = doc.page.height - 40;
-    doc.fontSize(8).fillColor("#666").text(
-      "Municipalidad de Curacaví - Departamento de Transporte",
-      L(),
-      footerY,
-      { align: "center" }
-    );
+    doc
+      .fontSize(8)
+      .fillColor("#666")
+      .text(
+        "Municipalidad de Curacaví - Departamento de Transporte",
+        L(),
+        footerY,
+        { align: "center" }
+      );
 
     doc.end();
   } catch (err) {
