@@ -12,6 +12,7 @@ import Reportes from "./pages/Reportes.jsx";
 import Login from "./pages/Login.jsx";
 import Usuarios from "./pages/Usuarios.jsx";
 import Conductores from "./pages/Conductores.jsx";
+import Mantenciones from "./pages/Mantenciones.jsx";
 
 import PrivateRoute from "./router/PrivateRoute.jsx";
 
