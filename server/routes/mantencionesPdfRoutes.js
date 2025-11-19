@@ -46,12 +46,11 @@ router.get("/:id/pdf", auth, async (req, res) => {
       [id]
     );
 
-    /* ================= CONFIG PDF ================= */
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename=mantencion_${id}.pdf`
-    );
+    /* ================= HEADERS ================= */
+    res.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename=mantencion_${id}.pdf`,
+    });
 
     const doc = new PDFDocument({
       size: "A4",
@@ -176,7 +175,6 @@ router.get("/:id/pdf", auth, async (req, res) => {
 
       y += rowH;
 
-      // FILAS
       doc.font("Helvetica").fontSize(9).fillColor("#000");
 
       let total = 0;
@@ -237,14 +235,19 @@ router.get("/:id/pdf", auth, async (req, res) => {
     doc.text("_____________________________", L + 250, doc.y - 12);
     doc.text("Supervisor", L + 270, doc.y + 12);
 
-    /* ================= PAGINACIÓN REAL ================= */
+    /* ================= PAGINACIÓN ================= */
+    doc.flushPages();
     const pages = doc.bufferedPageRange();
+
     for (let i = pages.start; i < pages.start + pages.count; i++) {
       doc.switchToPage(i);
       drawHeader(i - pages.start + 1, pages.count);
     }
 
     doc.end();
+
+    doc.on("end", () => res.end());
+
   } catch (err) {
     console.error("❌ Error generando PDF de mantención:", err);
     res.status(500).send("Error al generar PDF");
