@@ -1,29 +1,23 @@
 // routes/mantencionesPdfRoutes.js
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
+const crypto = require("crypto");
 const { db } = require("../config/db");
-const { auth } = require("../middleware/auth");
+const { authOptional } = require("../middleware/authOptional"); // NUEVO: Permite token por query
 
 const router = express.Router();
 
-// aceptar token por query
-router.use((req, res, next) => {
-  if (req.query.token) {
-    req.headers.authorization = `Bearer ${req.query.token}`;
-  }
-  next();
-});
-
-/* ========== RUTA PDF ========== */
-router.get("/:id/pdf", auth, async (req, res) => {
-  const { id } = req.params;
-
+/* ============================================================
+   ============ GENERAR PDF DE MANTENCIÓN ======================
+   ============================================================ */
+router.get("/:id/pdf", authOptional, async (req, res) => {
   try {
+    const { id } = req.params;
+
     /* ================= CONSULTA PRINCIPAL ================= */
-    const { rows: rowsMant } = await db.query(
+    const { rows: mantRows } = await db.query(
       `
       SELECT 
         m.*, 
@@ -38,22 +32,33 @@ router.get("/:id/pdf", auth, async (req, res) => {
       [id]
     );
 
-    if (!rowsMant.length) {
-      return res.status(404).json({ error: "Mantención no encontrada" });
-    }
+    if (!mantRows.length)
+      return res.status(404).send("Mantención no encontrada");
 
-    const data = rowsMant[0];
+    const data = mantRows[0];
 
-    /* ================= DETALLE ================= */
+    /* ================= DETALLES ================= */
     const { rows: items } = await db.query(
       `
-      SELECT item, tipo, cantidad, costo_unitario,
-             cantidad * costo_unitario AS subtotal
+      SELECT 
+        item, tipo, cantidad, costo_unitario,
+        (cantidad * costo_unitario) AS subtotal
       FROM mantencion_items
       WHERE mantencion_id = $1
       `,
       [id]
     );
+
+    /* ================= FOLIO ÚNICO ================= */
+    const folio = crypto.randomBytes(8).toString("hex").toUpperCase();
+
+    /* ================= HASH DE INTEGRIDAD ================= */
+    const hash = crypto
+      .createHash("sha256")
+      .update(JSON.stringify({ data, items }))
+      .digest("hex")
+      .substring(0, 20)
+      .toUpperCase();
 
     /* ================= CONFIG PDF ================= */
     res.setHeader("Content-Type", "application/pdf");
@@ -65,56 +70,94 @@ router.get("/:id/pdf", auth, async (req, res) => {
     const doc = new PDFDocument({
       size: "A4",
       margins: { top: 60, bottom: 60, left: 40, right: 40 },
-      bufferPages: true
+      bufferPages: true,
     });
 
     doc.pipe(res);
 
-    /* ================= LOGO ================= */
     const logoPath = path.join(__dirname, "../public/logo.png");
 
     /* ================= QR ================= */
-    const qrURL = `https://curacavi-frontend.onrender.com/mantenciones/${id}`;
-    const qrDataURL = await QRCode.toDataURL(qrURL);
+    const qrTexto = `
+FOLIO: ${folio}
+Vehículo: ${data.vehiculo}
+Fecha: ${new Date(data.fecha).toLocaleString("es-CL")}
+Hash: ${hash}
+    `.trim();
 
-    /* ================= HEADER ================= */
-    const drawHeader = (pageNum, totalPages) => {
+    const qrDataURL = await QRCode.toDataURL(qrTexto);
+
+    /* ================= MARCA DE AGUA ================= */
+    doc.save();
+    doc.fontSize(60)
+      .fillColor("#CCCCCC")
+      .opacity(0.15)
+      .text("MUNICIPALIDAD DE CURACAVÍ", 80, 280, {
+        angle: 30,
+      });
+    doc.restore();
+
+    /* ================= ENCABEZADO ================= */
+    const drawHeader = (current, total) => {
       const L = doc.page.margins.left;
 
-      if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, L, 15, { width: 80 });
-      }
+      // LOGO
+      try {
+        const fs = require("fs");
+        if (fs.existsSync(logoPath)) {
+          doc.image(logoPath, L, 20, { width: 70 });
+        }
+      } catch {}
 
-      doc
-        .font("Helvetica-Bold")
+      // TITULOS
+      doc.font("Helvetica-Bold")
         .fontSize(14)
         .fillColor("#003366")
-        .text("MUNICIPALIDAD DE CURACAVÍ", L + 100, 25)
+        .text("MUNICIPALIDAD DE CURACAVÍ", L + 90, 20)
         .fontSize(10)
         .fillColor("#000")
-        .text("Dirección de Operaciones — Departamento de Movilización", L + 100, 42);
+        .text(
+          "Dirección de Operaciones — Departamento de Movilización",
+          L + 90,
+          38
+        );
 
-      doc
-        .moveTo(L, 70)
-        .lineTo(550, 70)
-        .stroke("#003366");
+      // LÍNEA
+      doc.moveTo(L, 60)
+        .lineTo(doc.page.width - L, 60)
+        .strokeColor("#003366")
+        .stroke();
 
-      doc.fontSize(9)
+      doc.font("Helvetica-Bold")
+        .fontSize(13)
+        .fillColor("#003366")
+        .text("INFORME DE MANTENCIÓN VEHICULAR", L, 75);
+
+      // Paginación
+      doc.font("Helvetica")
+        .fontSize(9)
         .fillColor("#666")
-        .text(`Página ${pageNum} de ${totalPages}`, L, 80);
+        .text(`Página ${current} de ${total}`, L, 95);
+
+      // QR
+      doc.image(qrDataURL, doc.page.width - 120, 20, { width: 80 });
     };
 
-    /* ================= PRIMERA PÁGINA ================= */
+    /* ================= CONTENIDO ================= */
     drawHeader(1, 1);
 
     const L = doc.page.margins.left;
 
-    /* ===== DATOS GENERALES ===== */
+    // DATOS GENERALES
     doc.moveDown(3);
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#003366").text("Datos Generales");
-    doc.moveDown(0.5).font("Helvetica").fontSize(10).fillColor("#000");
+    doc.font("Helvetica-Bold")
+      .fontSize(12)
+      .fillColor("#003366")
+      .text("Datos Generales", L);
 
-    doc.text(`ID Mantención: ${id}`);
+    doc.font("Helvetica").fontSize(10).fillColor("#000").moveDown(1);
+
+    doc.text(`Folio interno: ${folio}`);
     doc.text(`Vehículo: ${data.vehiculo} (${data.numero_interno})`);
     doc.text(`Tipo: ${data.tipo}`);
     doc.text(`Responsable: ${data.responsable || "Sin asignar"}`);
@@ -124,86 +167,119 @@ router.get("/:id/pdf", auth, async (req, res) => {
         timeStyle: "short",
       })}`
     );
-    doc.text(`Costo total: $${Number(data.costo).toLocaleString("es-CL")}`);
+    doc.text(
+      `Costo total: $${Number(data.costo || 0).toLocaleString("es-CL")}`
+    );
 
-    /* ===== QR CODE ===== */
-    doc.image(qrDataURL, 450, 95, { width: 90 });
+    /* ================= OBSERVACIONES ================= */
+    doc.moveDown(2);
+    doc.font("Helvetica-Bold")
+      .fontSize(12)
+      .fillColor("#003366")
+      .text("Observaciones", L);
 
-    /* ===== OBSERVACIONES ===== */
-    doc.moveDown(1.5);
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#003366").text("Observaciones");
-    doc.moveDown(0.5);
-    doc.font("Helvetica").fontSize(10).fillColor("#000");
-    doc.text(data.observacion || "Sin observaciones registradas.", { width: 450 });
+    doc.font("Helvetica")
+      .fontSize(10)
+      .fillColor("#000")
+      .moveDown(0.7)
+      .text(data.observacion || "Sin observaciones registradas.", {
+        width: 480,
+      });
 
-    /* ===== DETALLE ===== */
-    doc.moveDown(1.5);
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#003366").text("Detalle de Tareas y Repuestos");
-    doc.moveDown(0.5);
+    /* ================= TABLA DETALLE ================= */
+    doc.moveDown(2);
 
-    const tableX = L;
-    let tableY = doc.y;
+    if (items.length > 0) {
+      doc.font("Helvetica-Bold")
+        .fontSize(12)
+        .fillColor("#003366")
+        .text("Detalle de Tareas y Repuestos", L);
 
-    const colWidths = [160, 70, 60, 80, 80];
-    const rowHeight = 18;
+      doc.moveDown(1);
 
-    /* HEADER TABLA */
-    doc.rect(tableX, tableY, colWidths.reduce((a,b)=>a+b), rowHeight)
-       .fill("#003366");
-    doc.fillColor("#fff").font("Helvetica-Bold").fontSize(10);
+      const startX = L;
+      const widths = [170, 70, 60, 80, 80];
+      const rowH = 18;
 
-    let xx = tableX;
-    ["Ítem", "Tipo", "Cant.", "Unitario", "Subtotal"].forEach((h, i) => {
-      doc.text(h, xx + 5, tableY + 4);
-      xx += colWidths[i];
-    });
+      let y = doc.y;
 
-    tableY += rowHeight;
-    doc.font("Helvetica").fontSize(9).fillColor("#000");
+      // HEADER TABLA
+      doc.rect(startX, y, widths.reduce((a, b) => a + b), rowH)
+        .fillAndStroke("#003366", "#003366");
 
-    let total = 0;
+      doc.fillColor("#FFF").font("Helvetica-Bold").fontSize(10);
 
-    for (let i = 0; i < items.length; i++) {
-      const it = items[i];
+      let x = startX;
+      ["Ítem", "Tipo", "Cant.", "Unitario", "Subtotal"].forEach((h, i) => {
+        doc.text(h, x + 5, y + 4, { width: widths[i] - 10 });
+        x += widths[i];
+      });
 
-      if (tableY > 720) {
-        doc.addPage();
-        tableY = 120;
-      }
+      y += rowH;
 
-      const bg = i % 2 === 0 ? "#F8F8F8" : "#FFFFFF";
-      doc.rect(tableX, tableY, colWidths.reduce((a,b)=>a+b), rowHeight)
-         .fill(bg)
-         .stroke("#DDD");
+      doc.font("Helvetica").fontSize(9).fillColor("#000");
 
-      let cx = tableX;
-      doc.fillColor("#000");
-      doc.text(it.item, cx + 5, tableY + 4, { width: colWidths[0] - 10 });
-      cx += colWidths[0];
-      doc.text(it.tipo, cx + 5, tableY + 4);
-      cx += colWidths[1];
-      doc.text(String(it.cantidad), cx + 5, tableY + 4);
-      cx += colWidths[2];
-      doc.text(`$${Number(it.costo_unitario).toLocaleString("es-CL")}`, cx + 5, tableY + 4);
-      cx += colWidths[3];
-      doc.text(`$${Number(it.subtotal).toLocaleString("es-CL")}`, cx + 5, tableY + 4);
+      let total = 0;
 
-      total += Number(it.subtotal);
-      tableY += rowHeight;
+      items.forEach((it, idx) => {
+        if (y > doc.page.height - 120) {
+          doc.addPage();
+          y = doc.page.margins.top + 40;
+        }
+
+        const bg = idx % 2 === 0 ? "#F2F2F2" : "#FFFFFF";
+
+        doc.rect(startX, y, widths.reduce((a, b) => a + b), rowH)
+          .fillAndStroke(bg, "#CCCCCC");
+
+        let colX = startX;
+
+        doc.text(it.item, colX + 5, y + 4, { width: widths[0] - 10 });
+        colX += widths[0];
+
+        doc.text(it.tipo, colX + 5, y + 4);
+        colX += widths[1];
+
+        doc.text(String(it.cantidad), colX + 5, y + 4);
+        colX += widths[2];
+
+        doc.text(
+          `$${Number(it.costo_unitario).toLocaleString("es-CL")}`,
+          colX + 5,
+          y + 4
+        );
+        colX += widths[3];
+
+        doc.text(
+          `$${Number(it.subtotal).toLocaleString("es-CL")}`,
+          colX + 5,
+          y + 4
+        );
+
+        total += Number(it.subtotal);
+        y += rowH;
+      });
+
+      doc.font("Helvetica-Bold")
+        .fontSize(11)
+        .fillColor("#000")
+        .text(`TOTAL: $${total.toLocaleString("es-CL")}`, startX + 300, y + 12);
+
+    } else {
+      doc.text("Sin ítems registrados.", L);
     }
 
-    doc.moveDown(1);
-    doc.font("Helvetica-Bold").text(`TOTAL: $${total.toLocaleString("es-CL")}`, tableX + 300);
-
-    /* ========== FIRMAS ========== */
+    /* ================= PIE – FOLIO & HASH ================= */
     doc.moveDown(3);
-    doc.text("_____________________________", L);
-    doc.text("Firma Responsable", L + 10);
+    doc.font("Helvetica-Bold")
+      .fontSize(10)
+      .text(`Folio interno: ${folio}`);
+    doc.font("Helvetica")
+      .fontSize(9)
+      .text(`Hash de integridad: ${hash}`);
+    doc.text("Documento generado automáticamente por Gestor Municipal Curacaví");
 
-    doc.text("_____________________________", L + 250, doc.y - 12);
-    doc.text("Supervisor", L + 260);
-
-    /* ====== PAGINACIÓN ====== */
+    /* ================= PAGINACIÓN REAL ================= */
     const pages = doc.bufferedPageRange();
     for (let i = pages.start; i < pages.start + pages.count; i++) {
       doc.switchToPage(i);
@@ -212,8 +288,8 @@ router.get("/:id/pdf", auth, async (req, res) => {
 
     doc.end();
   } catch (err) {
-    console.error("PDF ERROR:", err);
-    res.status(500).json({ error: "Error generando PDF" });
+    console.error("❌ Error PDF:", err);
+    res.status(500).send("Error al generar PDF");
   }
 });
 
