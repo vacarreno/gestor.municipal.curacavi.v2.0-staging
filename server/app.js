@@ -6,24 +6,29 @@ const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const compression = require("compression");
 require("dotenv").config();
-const { db } = require("./config/db");
-
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 const isProd = NODE_ENV === "production";
 
-// === DOMINIOS PERMITIDOS ===
-const allowedDomains = [
-  "https://curacavi-frontend.onrender.com",
-].filter(Boolean);
+// ========================================================
+// ================= CONFIGURACIÓN BASE ===================
+// ========================================================
 
-// === APP EXPRESS ===
+const allowedDomains = ["https://curacavi-frontend.onrender.com"].filter(
+  Boolean
+);
+
 const app = express();
 app.set("trust proxy", 1);
-// === LOGGING ===
+
+// ========================================================
+// =================== MIDDLEWARE CORE ====================
+// ========================================================
+
+// Logging
 app.use(morgan(isProd ? "combined" : "dev"));
 
-// === SEGURIDAD ===
+// Seguridad
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -31,10 +36,10 @@ app.use(
   })
 );
 
-// === COMPRESIÓN ===
+// Compresión
 app.use(compression());
 
-// === RATE LIMIT ===
+// Rate Limit
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -45,18 +50,17 @@ app.use(
   })
 );
 
-// === BODY PARSERS ===
+// Body Parsers
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// === CORS ===
+// CORS Controlado
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Postman / SSR
-      if (allowedDomains.includes(origin)) {
-        return callback(null, true);
-      }
+      if (!origin) return callback(null, true);
+      if (allowedDomains.includes(origin)) return callback(null, true);
+
       console.warn("❌ CORS bloqueado:", origin);
       return callback(new Error("CORS no permitido"));
     },
@@ -66,7 +70,7 @@ app.use(
   })
 );
 
-// === PREFLIGHT EXPRESS 5 ===
+// PREFLIGHT (Express v5)
 app.options(/.*/, (req, res) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
@@ -74,9 +78,7 @@ app.options(/.*/, (req, res) => {
   return res.sendStatus(204);
 });
 
-
-
-// === DEBUG LOCAL ===
+// Debug Local
 if (!isProd) {
   app.use((req, _, next) => {
     console.log(`[DEBUG] ${req.method} ${req.originalUrl}`);
@@ -84,17 +86,32 @@ if (!isProd) {
   });
 }
 
-// === RUTAS ===
-app.use("/auth", require("./routes/authRoutes"));
-app.use("/usuarios", require("./routes/usuarioRoutes"));
-app.use("/vehiculos", require("./routes/vehiculoRoutes"));
-app.use("/conductores", require("./routes/conductorRoutes"));
-app.use("/inspecciones", require("./routes/inspeccionRoutes"));
-app.use("/reportes", require("./routes/reportesRoutes"));
-app.use("/mantenciones", require("./routes/mantencionesRoutes"));
-app.use("/mantenciones/pdf", require("./routes/mantencionesPdfRoutes"));
+// ========================================================
+// ====================== ROUTER MAP ======================
+// ========================================================
+// Ordenado por categoría / módulo para evitar colisiones
 
-// === HEALTHCHECK ===
+// --- Autenticación / Seguridad ---
+app.use("/auth", require("./routes/authRoutes"));
+
+// --- Gestión Usuarios ---
+app.use("/usuarios", require("./routes/usuarioRoutes"));
+app.use("/conductores", require("./routes/conductorRoutes"));
+
+// --- Flota Vehicular ---
+app.use("/vehiculos", require("./routes/vehiculoRoutes"));
+app.use("/inspecciones", require("./routes/inspeccionRoutes"));
+
+// --- Mantenciones (específico → general) ---
+app.use("/mantenciones/pdf", require("./routes/mantencionesPdfRoutes"));
+app.use("/mantenciones", require("./routes/mantencionesRoutes"));
+
+// --- Reportes ---
+app.use("/reportes", require("./routes/reportesRoutes"));
+
+// ========================================================
+// ====================== HEALTHCHECK =====================
+// ========================================================
 app.get("/", (_, res) => {
   res.json({
     ok: true,
@@ -105,12 +122,16 @@ app.get("/", (_, res) => {
   });
 });
 
-// === CATCH-ALL (Express 5 OK) ===
-app.use(/.*/, (req, res) => {
+// ========================================================
+// ======================= 404 GLOBAL =====================
+// ========================================================
+app.use(/.*/, (_, res) => {
   res.status(404).json({ error: "Ruta no encontrada" });
 });
 
-// === INICIO SERVIDOR ===
+// ========================================================
+// =================== INICIO SERVIDOR ====================
+// ========================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
