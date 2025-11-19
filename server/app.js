@@ -103,7 +103,7 @@ app.use("/vehiculos", require("./routes/vehiculoRoutes"));
 app.use("/inspecciones", require("./routes/inspeccionRoutes"));
 
 // --- Mantenciones (específico → general) ---
-app.use("/mantenciones/pdf", require("./routes/mantencionesPdfRoutes"));
+app.use("/mantenciones", require("./routes/mantencionesPdfRoutes"));
 app.use("/mantenciones", require("./routes/mantencionesRoutes"));
 
 // --- Reportes ---
