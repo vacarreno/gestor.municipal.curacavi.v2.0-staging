@@ -12,7 +12,7 @@ export default function Mantenciones() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [form, setForm] = useState({
-    id: null,
+    id: null, 
     vehiculo_id: "",
     usuario_id: "",
     tipo: "",
