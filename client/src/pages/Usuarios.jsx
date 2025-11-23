@@ -54,8 +54,7 @@ export default function Usuarios() {
     }
 
     const resto = 11 - (suma % 11);
-    const dvEsperado =
-      resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+    const dvEsperado = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
 
     return dvEsperado === dv;
   };
@@ -92,8 +91,7 @@ export default function Usuarios() {
     if (!valor) return false;
     return usuarios.some(
       (u) =>
-        u[campo]?.toLowerCase() === valor.toLowerCase() &&
-        u.id !== idActual
+        u[campo]?.toLowerCase() === valor.toLowerCase() && u.id !== idActual
     );
   };
 
@@ -144,8 +142,7 @@ export default function Usuarios() {
         alert("Usuario actualizado correctamente");
       } else {
         // CREATE
-        if (!form.password.trim())
-          return alert("Debe ingresar una contraseña");
+        if (!form.password.trim()) return alert("Debe ingresar una contraseña");
         await api.post("/usuarios", payload);
         alert("Usuario creado correctamente");
       }
@@ -153,7 +150,9 @@ export default function Usuarios() {
       cerrarModal();
       load();
     } catch (e) {
-      alert("Error guardando usuario: " + (e.response?.data?.message || e.message));
+      alert(
+        "Error guardando usuario: " + (e.response?.data?.message || e.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -217,7 +216,6 @@ export default function Usuarios() {
   // ============================================
   return (
     <div className="container-fluid">
-
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3 className="m-0">Gestión de Usuarios</h3>
         <Button variant="primary" onClick={nuevoUsuario}>
@@ -314,7 +312,6 @@ export default function Usuarios() {
         <Modal.Body>
           <Form key={formKey}>
             <div className="row g-3">
-
               <div className="col-md-4">
                 <Form.Label>Usuario</Form.Label>
                 <Form.Control
@@ -414,8 +411,13 @@ export default function Usuarios() {
                 >
                   <option value="Usuario">Usuario</option>
                   <option value="Conductor">Conductor</option>
+                  <option value="Vecino">Vecino</option>
+                  <option value="Comercio">Comercio</option>
                   <option value="Supervisor">Supervisor</option>
                   <option value="admin">Administrador</option>
+                  <option value="adminbilletera">
+                    Administrador de Billetera
+                  </option>
                 </Form.Select>
               </div>
 
@@ -443,18 +445,10 @@ export default function Usuarios() {
             Cancelar
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <Button variant="primary" onClick={handleSubmit} disabled={loading}>
             {loading ? (
               <>
-                <Spinner
-                  size="sm"
-                  animation="border"
-                  className="me-2"
-                />
+                <Spinner size="sm" animation="border" className="me-2" />
                 Guardando...
               </>
             ) : form.id ? (

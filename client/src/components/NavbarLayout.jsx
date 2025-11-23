@@ -138,6 +138,40 @@ export default function NavbarLayout() {
             </>
           )}
 
+
+{/* === Billetera (Solo Administrador de Billetera) === */}
+          {rol === "adminbilletera" && (
+            <div className="config-menu mt-2">
+              <button
+                type="button"
+                className="btn btn-link text-start p-0 w-100 d-flex align-items-center gap-2 text-white"
+                onClick={() => setShowConfig(!showConfig)}
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                }}
+              >
+                <Gear /> Billetera
+              </button>
+
+              {showConfig && (
+                <div className="ps-4 d-grid gap-1 mt-1">
+                  <NavLink
+                    to="/billetera"
+                    className={({ isActive }) =>
+                      `d-flex align-items-center gap-2 nav-link text-white ${
+                        isActive ? "fw-bold text-primary" : ""
+                      }`
+                    }
+                  >
+                    <PersonFillGear /> Gestión de Billetera
+                  </NavLink>
+                </div>
+              )}
+            </div>
+          )}
+
+
           {/* === Configuración (Solo Admin) === */}
           {rol === "admin" && (
             <div className="config-menu mt-2">
