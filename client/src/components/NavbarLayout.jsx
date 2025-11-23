@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   Gear,
   PersonFillGear,
+  PersonFillWallet,
   PersonCircle,
   Wrench,
   Wallet,
@@ -165,7 +166,7 @@ export default function NavbarLayout() {
                       }`
                     }
                   >
-                    <PersonFillGear /> Gestión de Billetera
+                    <PersonFillWallet /> Gestión de Billetera
                   </NavLink>
                 </div>
               )}
