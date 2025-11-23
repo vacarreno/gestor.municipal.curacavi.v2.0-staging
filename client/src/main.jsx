@@ -13,6 +13,7 @@ import Login from "./pages/Login.jsx";
 import Usuarios from "./pages/Usuarios.jsx";
 import Conductores from "./pages/Conductores.jsx";
 import Mantenciones from "./pages/Mantenciones.jsx";
+import BilleteraPage from "./pages/Billetera/BilleteraPage"; 
 
 import PrivateRoute from "./router/PrivateRoute.jsx";
 
