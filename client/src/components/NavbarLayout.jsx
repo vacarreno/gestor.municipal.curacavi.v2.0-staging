@@ -14,7 +14,8 @@ import {
 
 export default function NavbarLayout() {
   const [navOpen, setNavOpen] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);        // Configuración Admin
+  const [showBilletera, setShowBilletera] = useState(false);  // Configuración Billetera
 
   // === USUARIO LOGUEADO ===
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -29,7 +30,7 @@ export default function NavbarLayout() {
 
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
-      
+
       {/* BOTÓN MENÚ MÓVIL */}
       <button
         className="hamburger btn btn-light btn-sm"
@@ -63,7 +64,7 @@ export default function NavbarLayout() {
 
         <nav className="d-grid gap-2" onClick={() => setNavOpen(false)}>
 
-          {/* === Dashboard (Todos) === */}
+          {/* === Dashboard === */}
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
@@ -75,7 +76,7 @@ export default function NavbarLayout() {
             <HouseDoor /> Dashboard
           </NavLink>
 
-          {/* === Inspección (Conductor/Admin/Supervisor) === */}
+          {/* === Inspección === */}
           {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
             <NavLink
               to="/inspeccion"
@@ -138,14 +139,13 @@ export default function NavbarLayout() {
             </>
           )}
 
-
-{/* === Billetera (Solo Administrador de Billetera) === */}
+          {/* === Billetera (Solo Administrador de Billetera) === */}
           {rol === "adminbilletera" && (
             <div className="config-menu mt-2">
               <button
                 type="button"
                 className="btn btn-link text-start p-0 w-100 d-flex align-items-center gap-2 text-white"
-                onClick={() => setShowConfig(!showConfig)}
+                onClick={() => setShowBilletera(!showBilletera)}
                 style={{
                   textDecoration: "none",
                   fontWeight: "bold",
@@ -154,7 +154,7 @@ export default function NavbarLayout() {
                 <Gear /> Billetera
               </button>
 
-              {showConfig && (
+              {showBilletera && (
                 <div className="ps-4 d-grid gap-1 mt-1">
                   <NavLink
                     to="/billetera"
@@ -170,7 +170,6 @@ export default function NavbarLayout() {
               )}
             </div>
           )}
-
 
           {/* === Configuración (Solo Admin) === */}
           {rol === "admin" && (
@@ -216,19 +215,15 @@ export default function NavbarLayout() {
       <div className="d-flex flex-column">
 
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
-
           <div className="text-muted small">
             Backend: https://curacavi-backend.onrender.com
           </div>
 
           <div className="d-flex align-items-center gap-3">
-
             <div className="d-flex align-items-center gap-2 text-secondary fw-semibold">
               <PersonCircle size={20} />
               {user?.nombre || user?.username || "Usuario"}
-              <span className="text-muted small">
-                ({rol})
-              </span>
+              <span className="text-muted small">({rol})</span>
             </div>
 
             <button
