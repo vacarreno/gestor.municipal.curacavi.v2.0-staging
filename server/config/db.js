@@ -25,4 +25,5 @@ db.connect()
     console.error("❌ Error PostgreSQL:", err);
   });
 
-module.exports = { db };
+// EXPORTACIÓN CORRECTA
+module.exports = db;
