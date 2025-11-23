@@ -2,8 +2,8 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { db } = require("../config/db");
-const { auth } = require("../middleware/auth");
+const db = require("../config/db");     // <-- también corregido
+const auth = require("../middleware/auth"); // <-- FIX
 
 const router = express.Router();
 
@@ -16,9 +16,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Usuario y contraseña requeridos" });
     }
 
-    // ============================
     // POSTGRESQL QUERY
-    // ============================
     const result = await db.query(
       `
       SELECT id, username, nombre, correo, rol, password_hash
