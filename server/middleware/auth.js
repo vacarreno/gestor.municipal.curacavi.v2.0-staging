@@ -19,14 +19,12 @@ function auth(req, res, next) {
         .json({ message: "Token inválido: formato no reconocido." });
     }
 
-    // Validación estructural
     if (!decoded.id || !decoded.rol) {
       return res.status(401).json({
         message: "Token inválido: datos incompletos.",
       });
     }
 
-    // Normalizar rol (Conductor, Administrador, Usuario, etc.)
     const cleanRol =
       typeof decoded.rol === "string"
         ? decoded.rol.trim().charAt(0).toUpperCase() +
@@ -55,4 +53,4 @@ function auth(req, res, next) {
   }
 }
 
-module.exports = { auth };
+module.exports = auth;
