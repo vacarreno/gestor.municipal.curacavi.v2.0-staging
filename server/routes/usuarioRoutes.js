@@ -1,7 +1,7 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const db = require("../config/db");     // FIX: tu config exporta el Pool directo
+const { db } = require("../config/db");     // FIX: tu config exporta el Pool directo
 const auth = require("../middleware/auth");
 
 const router = express.Router();
