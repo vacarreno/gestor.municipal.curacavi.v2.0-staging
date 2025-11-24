@@ -1,7 +1,7 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const pool = require("../config/db");  // ✅ Importar como 'pool' para mayor claridad
+const { db } = require("../config/db");  // ✅ Mismo patrón que vehiculoRoutes
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -11,7 +11,7 @@ const router = express.Router();
    ============================================================ */
 router.get("/", auth, async (_req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await db.query(`
       SELECT 
         id, username, nombre, correo, rol, activo,
         rut, direccion, telefono, licencia, departamento
@@ -31,7 +31,7 @@ router.get("/", auth, async (_req, res) => {
    ============================================================ */
 router.get("/conductores", auth, async (_req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await db.query(`
       SELECT 
         id, username, nombre, correo, rol, activo,
         rut, direccion, telefono, licencia, departamento
@@ -72,7 +72,7 @@ router.post("/", auth, async (req, res) => {
 
   try {
     // Validar duplicado
-    const exists = await pool.query(
+    const exists = await db.query(
       `SELECT id FROM usuarios WHERE username=$1 LIMIT 1`,
       [username.trim()]
     );
@@ -83,7 +83,7 @@ router.post("/", auth, async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12);
 
-    const result = await pool.query(
+    const result = await db.query(
       `
       INSERT INTO usuarios (
         username, nombre, correo, rut, direccion, telefono, licencia,
@@ -130,7 +130,7 @@ router.put("/:id", auth, async (req, res) => {
   } = req.body || {};
 
   try {
-    const exists = await pool.query(
+    const exists = await db.query(
       `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
       [req.params.id]
     );
@@ -139,7 +139,7 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    await pool.query(
+    await db.query(
       `
       UPDATE usuarios SET
         nombre=$1,
@@ -185,7 +185,7 @@ router.put("/:id/password", auth, async (req, res) => {
   }
 
   try {
-    const exists = await pool.query(
+    const exists = await db.query(
       `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
       [req.params.id]
     );
@@ -196,7 +196,7 @@ router.put("/:id/password", auth, async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12);
 
-    await pool.query(
+    await db.query(
       `UPDATE usuarios SET password_hash=$1 WHERE id=$2`,
       [hash, req.params.id]
     );
@@ -213,7 +213,7 @@ router.put("/:id/password", auth, async (req, res) => {
    ============================================================ */
 router.delete("/:id", auth, async (req, res) => {
   try {
-    const exists = await pool.query(
+    const exists = await db.query(
       `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
       [req.params.id]
     );
@@ -222,7 +222,7 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    await pool.query("DELETE FROM usuarios WHERE id=$1", [req.params.id]);
+    await db.query("DELETE FROM usuarios WHERE id=$1", [req.params.id]);
 
     res.json({ ok: true });
   } catch (err) {
