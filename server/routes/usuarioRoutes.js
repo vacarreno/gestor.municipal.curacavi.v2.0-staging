@@ -1,9 +1,8 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { db } = require("../config/db");
+const db = require("../config/db");     // FIX: tu config exporta el Pool directo
 const auth = require("../middleware/auth");
-
 
 const router = express.Router();
 
@@ -37,7 +36,7 @@ router.get("/conductores", auth, async (_req, res) => {
         id, username, nombre, correo, rol, activo,
         rut, direccion, telefono, licencia, departamento
       FROM usuarios
-      WHERE LOWER(rol)='conductor' AND activo = 1
+      WHERE LOWER(rol) = 'conductor' AND activo = true
       ORDER BY nombre ASC
     `);
 
@@ -72,10 +71,10 @@ router.post("/", auth, async (req, res) => {
   }
 
   try {
-    /* --- Validación: evitar duplicados --- */
+    // Validación de duplicado
     const exists = await db.query(
       `SELECT id FROM usuarios WHERE username = $1 LIMIT 1`,
-      [username]
+      [username.trim()]
     );
 
     if (exists.rows.length > 0) {
@@ -87,10 +86,10 @@ router.post("/", auth, async (req, res) => {
     const result = await db.query(
       `
       INSERT INTO usuarios (
-        username, nombre, correo, rut, direccion, telefono, licencia, departamento,
-        rol, password_hash, activo
+        username, nombre, correo, rut, direccion, telefono, licencia,
+        departamento, rol, password_hash, activo
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,1)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING id
       `,
       [
@@ -104,6 +103,7 @@ router.post("/", auth, async (req, res) => {
         departamento || "Municipalidad",
         rol || "Usuario",
         hash,
+        true // PostgreSQL requiere booleano estricto
       ]
     );
 
@@ -131,7 +131,6 @@ router.put("/:id", auth, async (req, res) => {
   } = req.body || {};
 
   try {
-    /* Valida si existe */
     const exists = await db.query(
       `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
       [req.params.id]
@@ -164,7 +163,7 @@ router.put("/:id", auth, async (req, res) => {
         licencia || "",
         departamento || "Municipalidad",
         rol || "Usuario",
-        activo ? 1 : 0,
+        activo === true, // boolean real para PostgreSQL
         req.params.id,
       ]
     );
@@ -187,7 +186,6 @@ router.put("/:id/password", auth, async (req, res) => {
   }
 
   try {
-    /* Validación: usuario existe */
     const exists = await db.query(
       `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
       [req.params.id]
