@@ -1,3 +1,4 @@
+//client/src/pages/Billetera/BilleteraPage.jsx
 import { useEffect, useState } from "react";
 import { getVecinos, updateSaldo, regenerarQR } from "../services/billeteraService";
 import EditarVecinoModal from "./EditarVecinoModal";

@@ -1,3 +1,4 @@
+//client/src/pages/Billetera/EditarVecinoModal.jsx
 import { useState } from "react";
 
 export default function EditarVecinoModal({ vecino, onClose, onSave }) {
