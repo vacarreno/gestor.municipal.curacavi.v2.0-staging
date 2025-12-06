@@ -42,8 +42,8 @@ export default function NavbarLayout() {
           onClick={() => setNavOpen(true)}
           style={{
             position: "fixed",
-            top: "2px",
-            left: "5px",
+            top: "3px",
+            left: "3px",
             zIndex: 2000,
             fontSize: "24px",
             padding: "4px 10px",
