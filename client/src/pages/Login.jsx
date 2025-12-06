@@ -77,9 +77,17 @@ export default function Login() {
       style={{ background: "linear-gradient(135deg, #1E3A5F, #0A192F)" }}
     >
       <div
-        className="login-card bg-white p-4 rounded shadow-lg"
-        style={{ width: "100%", maxWidth: "380px" }}
-      >
+  className="login-card bg-white p-4 rounded shadow-lg"
+  style={{
+    width: "100%",
+    maxWidth: "380px",
+    position: "fixed",       // ← fija la tarjeta
+    top: "50%",              // ← centro vertical real
+    left: "50%",             // ← centro horizontal real
+    transform: "translate(-50%, -50%)", // ← evita movimientos del DOM
+  }}
+>
+
         {/* LOGO */}
         <div className="text-center mb-3">
           <img
