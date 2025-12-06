@@ -17,8 +17,8 @@ import {
 
 export default function NavbarLayout() {
   const [navOpen, setNavOpen] = useState(false);
-  const [showConfig, setShowConfig] = useState(false); // Configuración Admin
-  const [showBilletera, setShowBilletera] = useState(false); // Configuración Billetera
+  const [showConfig, setShowConfig] = useState(false); 
+  const [showBilletera, setShowBilletera] = useState(false); 
 
   // === USUARIO LOGUEADO ===
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -33,23 +33,25 @@ export default function NavbarLayout() {
 
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
-      {/* BOTÓN MENÚ MÓVIL (Actualizado con ícono List) */}
-      <button
-  className="hamburger btn btn-light"
-  aria-label="Abrir menú"
-  onClick={() => setNavOpen(true)}
-  style={{
-    position: "fixed",
-    top: "2px",
-    left: "2px",
-    zIndex: 2000,
-    fontSize: "28px",
-    padding: "4px 10px",
-  }}
->
-  <List size={28} />
-</button>
 
+      {/* BOTÓN MENÚ MÓVIL (Ahora se oculta si el menú está abierto) */}
+      {!navOpen && (
+        <button
+          className="hamburger btn btn-light"
+          aria-label="Abrir menú"
+          onClick={() => setNavOpen(true)}
+          style={{
+            position: "fixed",
+            top: "2px",
+            left: "5px",
+            zIndex: 2000,
+            fontSize: "28px",
+            padding: "4px 10px",
+          }}
+        >
+          <List size={28} />
+        </button>
+      )}
 
       {/* SIDEBAR */}
       <aside
@@ -165,7 +167,7 @@ export default function NavbarLayout() {
             </>
           )}
 
-          {/* === Billetera (Solo Administrador de Billetera) === */}
+          {/* === Billetera === */}
           {(rol === "adminbilletera" || rol === "admin") && (
             <div className="config-menu mt-2">
               <button
@@ -197,7 +199,7 @@ export default function NavbarLayout() {
             </div>
           )}
 
-          {/* === Configuración (Solo Admin) === */}
+          {/* === Configuración === */}
           {rol === "admin" && (
             <div className="config-menu mt-2">
               <button
@@ -228,6 +230,7 @@ export default function NavbarLayout() {
               )}
             </div>
           )}
+
         </nav>
       </aside>
 
