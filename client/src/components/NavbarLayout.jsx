@@ -45,7 +45,7 @@ export default function NavbarLayout() {
             top: "2px",
             left: "5px",
             zIndex: 2000,
-            fontSize: "28px",
+            fontSize: "24px",
             padding: "4px 10px",
           }}
         >
