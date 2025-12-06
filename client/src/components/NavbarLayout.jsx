@@ -35,13 +35,21 @@ export default function NavbarLayout() {
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
       {/* BOTÓN MENÚ MÓVIL (Actualizado con ícono List) */}
       <button
-        className="hamburger btn btn-light"
-        aria-label="Abrir menú"
-        onClick={() => setNavOpen(true)}
-        style={{ fontSize: "28px" }}
-      >
-        <List size={28} />
-      </button>
+  className="hamburger btn btn-light"
+  aria-label="Abrir menú"
+  onClick={() => setNavOpen(true)}
+  style={{
+    position: "fixed",
+    top: "10px",
+    left: "10px",
+    zIndex: 2000,
+    fontSize: "28px",
+    padding: "4px 10px",
+  }}
+>
+  <List size={28} />
+</button>
+
 
       {/* SIDEBAR */}
       <aside
