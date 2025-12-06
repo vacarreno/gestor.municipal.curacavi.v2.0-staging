@@ -65,6 +65,7 @@ export default function NavbarLayout() {
 
         <nav className="d-grid gap-2" onClick={() => setNavOpen(false)}>
           {/* === Dashboard === */}
+          {( rol === "admin" || rol === "Supervisor") && (
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
@@ -75,7 +76,9 @@ export default function NavbarLayout() {
           >
             <HouseDoor /> Dashboard
           </NavLink>
+           )}
 
+           
           {/* === Inspección === */}
           {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
             <NavLink
@@ -214,25 +217,65 @@ export default function NavbarLayout() {
       {/* CONTENEDOR PRINCIPAL */}
       <div className="d-flex flex-column">
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
-          <div className="text-muted small">
-            Backend: https://curacavi-backend.onrender.com
-          </div>
+  
+  {/* BOTÓN DE MENÚ BACKEND */}
+  <div className="position-relative">
+    <button
+      className="btn btn-sm btn-outline-primary fw-semibold"
+      onClick={() => setShowBackendMenu(!showBackendMenu)}
+    >
+      Backend
+    </button>
 
-          <div className="d-flex align-items-center gap-3">
-            <div className="d-flex align-items-center gap-2 text-secondary fw-semibold">
-              <PersonCircle size={20} />
-              {user?.nombre || user?.username || "Usuario"}
-              <span className="text-muted small">({rol})</span>
-            </div>
+    {/* MENÚ BACKEND DESPLEGABLE */}
+    {showBackendMenu && (
+      <div
+        className="position-absolute mt-2 p-2 border rounded bg-white shadow"
+        style={{ zIndex: 999 }}
+      >
+        <strong className="small text-muted">Endpoints disponibles</strong>
 
-            <button
-              className="btn btn-sm btn-outline-secondary"
-              onClick={handleLogout}
+        <ul className="list-unstyled mt-2 mb-1">
+          <li>
+            <a
+              href="https://curacavi-backend.onrender.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-decoration-none small"
             >
-              Cerrar sesión
-            </button>
-          </div>
-        </header>
+              Producción (Render)
+            </a>
+          </li>
+
+          {/* Espacio para agregar más ambientes si los tienes */}
+          {/* 
+          <li>
+            <a href="http://localhost:3001" ...> Local </a>
+          </li>
+          */}
+        </ul>
+      </div>
+    )}
+  </div>
+
+  {/* PANEL DE USUARIO (NO SE TOCA NADA) */}
+  <div className="d-flex align-items-center gap-3">
+    <div className="d-flex align-items-center gap-2 text-secondary fw-semibold">
+      <PersonCircle size={20} />
+      {user?.nombre || user?.username || "Usuario"}
+      <span className="text-muted small">({rol})</span>
+    </div>
+
+    <button
+      className="btn btn-sm btn-outline-secondary"
+      onClick={handleLogout}
+    >
+      Cerrar sesión
+    </button>
+  </div>
+
+</header>
+
 
         <main className="content flex-grow-1">
           <Outlet />
