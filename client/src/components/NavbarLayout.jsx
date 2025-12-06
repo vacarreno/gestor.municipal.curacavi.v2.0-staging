@@ -91,7 +91,7 @@ export default function NavbarLayout() {
           )}
 
           {/* === Conductores / Vehículos / Mantenciones / Reportes === */}
-          {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
+          {( rol === "admin" || rol === "Supervisor") && (
             <>
               <NavLink
                 to="/conductores"
