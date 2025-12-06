@@ -65,7 +65,7 @@ export default function NavbarLayout() {
 
         <nav className="d-grid gap-2" onClick={() => setNavOpen(false)}>
           {/* === Dashboard === */}
-          {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
+          {(rol === "admin" || rol === "Supervisor") && (
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
