@@ -12,6 +12,7 @@ import {
   Wrench,
   Wallet,
   Wallet2,
+  List
 } from "react-bootstrap-icons";
 
 export default function NavbarLayout() {
@@ -32,13 +33,14 @@ export default function NavbarLayout() {
 
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
-      {/* BOTÓN MENÚ MÓVIL */}
+      {/* BOTÓN MENÚ MÓVIL (Actualizado con ícono List) */}
       <button
-        className="hamburger btn btn-light btn-sm"
+        className="hamburger btn btn-light"
         aria-label="Abrir menú"
         onClick={() => setNavOpen(true)}
+        style={{ fontSize: "28px" }}
       >
-        ☰
+        <List size={28} />
       </button>
 
       {/* SIDEBAR */}
@@ -64,35 +66,36 @@ export default function NavbarLayout() {
         </div>
 
         <nav className="d-grid gap-2" onClick={() => setNavOpen(false)}>
+
           {/* === Dashboard === */}
           {(rol === "admin" || rol === "Supervisor") && (
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `d-flex align-items-center gap-2 nav-link text-white ${
-                isActive ? "fw-bold text-primary" : ""
-              }`
-            }
-          >
-            <HouseDoor /> Dashboard
-          </NavLink>
-           )}
-
-           
-          {/* === Inspección === */}
-          {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
-             <>
             <NavLink
-              to="/inspeccion"
+              to="/dashboard"
               className={({ isActive }) =>
                 `d-flex align-items-center gap-2 nav-link text-white ${
                   isActive ? "fw-bold text-primary" : ""
                 }`
               }
             >
-              <ClipboardCheck /> Inspección
+              <HouseDoor /> Dashboard
             </NavLink>
-            <NavLink
+          )}
+
+          {/* === Inspección === */}
+          {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
+            <>
+              <NavLink
+                to="/inspeccion"
+                className={({ isActive }) =>
+                  `d-flex align-items-center gap-2 nav-link text-white ${
+                    isActive ? "fw-bold text-primary" : ""
+                  }`
+                }
+              >
+                <ClipboardCheck /> Inspección
+              </NavLink>
+
+              <NavLink
                 to="/reportes"
                 className={({ isActive }) =>
                   `d-flex align-items-center gap-2 nav-link text-white ${
@@ -103,11 +106,10 @@ export default function NavbarLayout() {
                 <FileEarmarkText /> Reportes
               </NavLink>
             </>
-            
           )}
 
           {/* === Conductores / Vehículos / Mantenciones / Reportes === */}
-          {( rol === "admin" || rol === "Supervisor") && (
+          {(rol === "admin" || rol === "Supervisor") && (
             <>
               <NavLink
                 to="/conductores"
@@ -230,9 +232,7 @@ export default function NavbarLayout() {
       {/* CONTENEDOR PRINCIPAL */}
       <div className="d-flex flex-column">
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
-          <div className="text-muted small">
-            
-          </div>
+          <div className="text-muted small"></div>
 
           <div className="d-flex align-items-center gap-3">
             <div className="d-flex align-items-center gap-2 text-secondary fw-semibold">
@@ -255,8 +255,7 @@ export default function NavbarLayout() {
         </main>
 
         <footer className="footer p-2 px-3 text-center text-muted small">
-          © {new Date().getFullYear()} GESTOR MUNICIPAL — I. Municipalidad de
-          Curacaví
+          © {new Date().getFullYear()} GESTOR MUNICIPAL — I. Municipalidad de Curacaví
         </footer>
       </div>
     </div>
