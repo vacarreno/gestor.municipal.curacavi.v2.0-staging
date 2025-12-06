@@ -81,6 +81,7 @@ export default function NavbarLayout() {
            
           {/* === Inspección === */}
           {(rol === "Conductor" || rol === "admin" || rol === "Supervisor") && (
+             <>
             <NavLink
               to="/inspeccion"
               className={({ isActive }) =>
@@ -91,6 +92,18 @@ export default function NavbarLayout() {
             >
               <ClipboardCheck /> Inspección
             </NavLink>
+            <NavLink
+                to="/reportes"
+                className={({ isActive }) =>
+                  `d-flex align-items-center gap-2 nav-link text-white ${
+                    isActive ? "fw-bold text-primary" : ""
+                  }`
+                }
+              >
+                <FileEarmarkText /> Reportes
+              </NavLink>
+            </>
+            
           )}
 
           {/* === Conductores / Vehículos / Mantenciones / Reportes === */}
