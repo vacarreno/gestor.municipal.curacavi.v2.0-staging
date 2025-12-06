@@ -231,7 +231,7 @@ export default function NavbarLayout() {
       <div className="d-flex flex-column">
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
           <div className="text-muted small">
-            Backend: https://curacavi-backend.onrender.com
+            
           </div>
 
           <div className="d-flex align-items-center gap-3">
