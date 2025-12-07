@@ -64,7 +64,6 @@ app.options(/.*/, (req, res) => {
 // ========================================================
 // =========== SERVIR FOTOS DE PERFIL (MUY IMPORTANTE) ====
 // ========================================================
-const path = require("path");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ========================================================
