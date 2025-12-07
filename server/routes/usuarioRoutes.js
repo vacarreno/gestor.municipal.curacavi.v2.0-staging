@@ -1,7 +1,7 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { db } = require("../config/db");  // ✅ Mismo patrón que vehiculoRoutes
+const { db } = require("../config/db"); // ✅ Mismo patrón que vehiculoRoutes
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -196,10 +196,10 @@ router.put("/:id/password", auth, async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12);
 
-    await db.query(
-      `UPDATE usuarios SET password_hash=$1 WHERE id=$2`,
-      [hash, req.params.id]
-    );
+    await db.query(`UPDATE usuarios SET password_hash=$1 WHERE id=$2`, [
+      hash,
+      req.params.id,
+    ]);
 
     res.json({ ok: true });
   } catch (err) {
@@ -228,6 +228,50 @@ router.delete("/:id", auth, async (req, res) => {
   } catch (err) {
     console.error("❌ Error DELETE /usuarios/:id:", err);
     res.status(500).json({ message: "Error al eliminar usuario" });
+  }
+});
+
+/* ============================================================
+   ========== CAMBIAR CONTRASEÑA DEL USUARIO LOGUEADO ==========
+   ============================================================ */
+router.post("/change-password", auth, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Datos incompletos." });
+    }
+
+    // Obtener usuario actual
+    const result = await db.query(
+      "SELECT password_hash FROM usuarios WHERE id = $1 LIMIT 1",
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const user = result.rows[0];
+
+    // Validar contraseña anterior
+    const valid = await bcrypt.compare(oldPassword, user.password_hash);
+    if (!valid) {
+      return res.status(401).json({ message: "Contraseña actual incorrecta." });
+    }
+
+    // Generar nuevo hash
+    const hash = await bcrypt.hash(newPassword, 12);
+
+    await db.query("UPDATE usuarios SET password_hash = $1 WHERE id = $2", [
+      hash,
+      req.user.id,
+    ]);
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("❌ Error en POST /usuarios/change-password:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 });
 

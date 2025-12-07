@@ -12,6 +12,9 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
   const [newPass, setNewPass] = useState("");
   const [msg, setMsg] = useState("");
 
+  /* ===============================
+     SUBIR FOTO
+  =============================== */
   const subirFoto = async () => {
     try {
       if (!file) return;
@@ -24,35 +27,42 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
 
+      // Notificar cambio al navbar
       if (onUserUpdate) onUserUpdate({ ...user });
 
       setMsg("Foto actualizada.");
-    } catch (err) {
+    } catch {
       setMsg("Error subiendo foto.");
     }
   };
 
+  /* ===============================
+     CAMBIO DE CONTRASEÑA
+     (Ruta corregida)
+  =============================== */
   const cambiarPass = async () => {
     try {
-      await api.post("/auth/change-password", {
+      await api.post("/usuarios/change-password", {
         oldPassword: oldPass,
         newPassword: newPass
       });
 
       setMsg("Contraseña actualizada correctamente.");
-    } catch (err) {
+    } catch {
       setMsg("Error al cambiar contraseña.");
     }
   };
 
   return (
     <>
+      {/* BACKDROP */}
       <div
         className="modal-backdrop fade show"
         style={{ zIndex: 2000, backdropFilter: "blur(3px)" }}
         onClick={onHide}
       />
 
+      {/* MODAL */}
       <div
         className="modal fade show"
         style={{ display: "block", zIndex: 3000 }}
@@ -72,6 +82,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
 
             <div className="modal-body">
 
+              {/* FOTO */}
               <div className="text-center mb-3">
                 <img
                   src={fotoPreview}
@@ -102,6 +113,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                 </button>
               </div>
 
+              {/* DATOS */}
               <div className="mb-3">
                 <strong>Nombre:</strong> {user?.nombre} <br />
                 <strong>Usuario:</strong> {user?.username} <br />
@@ -110,6 +122,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
 
               <hr />
 
+              {/* PASSWORD */}
               <h6 className="fw-bold">Cambiar contraseña</h6>
 
               <input
