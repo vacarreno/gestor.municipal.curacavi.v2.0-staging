@@ -48,6 +48,9 @@ router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
     res.json({ url: fileUrl });
 
   } catch (err) {
+    console.log("REQ FILE =>", req.file);
+    console.log("REQ BODY =>", req.body);
+
     console.error("❌ Error subiendo foto:", err);
     res.status(500).json({ error: "Error interno al subir foto" });
   }
