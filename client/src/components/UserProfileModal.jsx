@@ -6,7 +6,9 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
 
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-  const [fotoPreview, setFotoPreview] = useState(user?.foto || "/default-user.png");
+  const [fotoPreview, setFotoPreview] = useState(
+    user?.foto || "/default-user.png"
+  );
   const [file, setFile] = useState(null);
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -22,7 +24,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       const form = new FormData();
       form.append("foto", file);
 
-      const res = await api.post("/users/upload-photo", form);
+      const res = await api.post("/usuarios/upload-photo", form);
 
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
@@ -44,7 +46,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
     try {
       await api.post("/usuarios/change-password", {
         oldPassword: oldPass,
-        newPassword: newPass
+        newPassword: newPass,
       });
 
       setMsg("Contraseña actualizada correctamente.");
@@ -74,14 +76,12 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="modal-content p-3 shadow-lg">
-
             <div className="modal-header">
               <h5 className="modal-title">Mi Perfil</h5>
               <button className="btn-close" onClick={onHide}></button>
             </div>
 
             <div className="modal-body">
-
               {/* FOTO */}
               <div className="text-center mb-3">
                 <img
@@ -93,7 +93,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                     borderRadius: "50%",
                     objectFit: "cover",
                     border: "3px solid #ddd",
-                    boxShadow: "0px 0px 8px rgba(0,0,0,0.2)"
+                    boxShadow: "0px 0px 8px rgba(0,0,0,0.2)",
                   }}
                 />
 
@@ -108,7 +108,10 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                   }}
                 />
 
-                <button className="btn btn-primary btn-sm mt-2" onClick={subirFoto}>
+                <button
+                  className="btn btn-primary btn-sm mt-2"
+                  onClick={subirFoto}
+                >
                   Actualizar Foto
                 </button>
               </div>
@@ -141,7 +144,10 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                 onChange={(e) => setNewPass(e.target.value)}
               />
 
-              <button className="btn btn-warning mt-3 w-100" onClick={cambiarPass}>
+              <button
+                className="btn btn-warning mt-3 w-100"
+                onClick={cambiarPass}
+              >
                 Actualizar Contraseña
               </button>
 
