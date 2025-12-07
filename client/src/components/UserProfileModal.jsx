@@ -13,7 +13,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
   const [msg, setMsg] = useState("");
 
   /* ===============================
-     SUBIR FOTO
+        SUBIR FOTO (nuevo endpoint)
   =============================== */
   const subirFoto = async () => {
     try {
@@ -22,23 +22,24 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       const form = new FormData();
       form.append("foto", file);
 
-      const res = await api.post("/users/upload-photo", form);
+      const res = await api.post("/usuarios/upload-photo", form, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
 
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
 
-      // Notificar cambio al navbar
       if (onUserUpdate) onUserUpdate({ ...user });
 
-      setMsg("Foto actualizada.");
-    } catch {
+      setMsg("Foto actualizada correctamente.");
+    } catch (err) {
+      console.error(err);
       setMsg("Error subiendo foto.");
     }
   };
 
   /* ===============================
-     CAMBIO DE CONTRASEÑA
-     (Ruta corregida)
+        CAMBIAR CONTRASEÑA
   =============================== */
   const cambiarPass = async () => {
     try {
@@ -48,21 +49,20 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       });
 
       setMsg("Contraseña actualizada correctamente.");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMsg("Error al cambiar contraseña.");
     }
   };
 
   return (
     <>
-      {/* BACKDROP */}
       <div
         className="modal-backdrop fade show"
         style={{ zIndex: 2000, backdropFilter: "blur(3px)" }}
         onClick={onHide}
       />
 
-      {/* MODAL */}
       <div
         className="modal fade show"
         style={{ display: "block", zIndex: 3000 }}
@@ -113,7 +113,6 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                 </button>
               </div>
 
-              {/* DATOS */}
               <div className="mb-3">
                 <strong>Nombre:</strong> {user?.nombre} <br />
                 <strong>Usuario:</strong> {user?.username} <br />

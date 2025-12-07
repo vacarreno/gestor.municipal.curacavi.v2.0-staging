@@ -1,10 +1,32 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { db } = require("../config/db");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
+
+/* ============================================================
+   ============ CONFIG SUBIDA DE FOTOS (MULTER)
+   ============================================================ */
+
+const uploadDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, uploadDir),
+  filename: (_, file, cb) => {
+    const clean = file.originalname.replace(/\s+/g, "_");
+    cb(null, Date.now() + "-" + clean);
+  }
+});
+
+const upload = multer({ storage });
 
 /* ============================================================
    =============== LISTAR TODOS LOS USUARIOS ===================
@@ -27,8 +49,71 @@ router.get("/", auth, async (_req, res) => {
 });
 
 /* ============================================================
-   ============ OBTENER CONDUCTORES ACTIVOS ====================
+   ================ SUBIR FOTO DEL PERFIL ======================
    ============================================================ */
+router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No se envió archivo" });
+
+    const url = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+
+    await db.query(
+      "UPDATE usuarios SET foto = $1 WHERE id = $2",
+      [url, req.user.id]
+    );
+
+    res.json({ url });
+  } catch (err) {
+    console.error("❌ Error subiendo foto:", err);
+    res.status(500).json({ message: "Error al subir la foto" });
+  }
+});
+
+/* ============================================================
+   ==================== CAMBIO DE CONTRASEÑA ===================
+   ============================================================ */
+router.post("/change-password", auth, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Datos incompletos." });
+    }
+
+    const result = await db.query(
+      "SELECT password_hash FROM usuarios WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const user = result.rows[0];
+    const valid = await bcrypt.compare(oldPassword, user.password_hash);
+
+    if (!valid) {
+      return res.status(401).json({ message: "Contraseña actual incorrecta." });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 12);
+
+    await db.query(
+      "UPDATE usuarios SET password_hash = $1 WHERE id = $2",
+      [hash, req.user.id]
+    );
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("❌ Error POST /usuarios/change-password:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+/* ============================================================
+   ================ RESTO DEL CRUD (INTACTO) ===================
+   ============================================================ */
+
 router.get("/conductores", auth, async (_req, res) => {
   try {
     const result = await db.query(`
@@ -47,34 +132,23 @@ router.get("/conductores", auth, async (_req, res) => {
   }
 });
 
-/* ============================================================
-   ======================== CREAR USUARIO ======================
-   ============================================================ */
 router.post("/", auth, async (req, res) => {
   const {
-    username,
-    nombre,
-    correo,
-    rut,
-    direccion,
-    telefono,
-    licencia,
-    departamento,
-    rol,
-    password,
+    username, nombre, correo, rut, direccion,
+    telefono, licencia, departamento, rol, password
   } = req.body || {};
 
   if (!username || !password) {
-    return res.status(400).json({ message: "Usuario y contraseña son obligatorios" });
+    return res.status(400).json({ message: "Usuario y contraseña requeridos" });
   }
 
   try {
     const exists = await db.query(
-      `SELECT id FROM usuarios WHERE username=$1 LIMIT 1`,
+      "SELECT id FROM usuarios WHERE username=$1 LIMIT 1",
       [username.trim()]
     );
 
-    if (exists.rows.length > 0) {
+    if (exists.rows.length) {
       return res.status(409).json({ message: "El usuario ya existe" });
     }
 
@@ -83,8 +157,8 @@ router.post("/", auth, async (req, res) => {
     const result = await db.query(
       `
       INSERT INTO usuarios (
-        username, nombre, correo, rut, direccion, telefono, licencia,
-        departamento, rol, password_hash, activo, foto
+        username, nombre, correo, rut, direccion, telefono,
+        licencia, departamento, rol, password_hash, activo, foto
       )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true,NULL)
       RETURNING id
@@ -99,36 +173,26 @@ router.post("/", auth, async (req, res) => {
         licencia || "",
         departamento || "Municipalidad",
         rol || "Usuario",
-        hash,
+        hash
       ]
     );
 
-    res.status(201).json({ id: result.rows[0].id });
+    res.json({ id: result.rows[0].id });
   } catch (err) {
     console.error("❌ Error POST /usuarios:", err);
     res.status(500).json({ message: "Error al crear usuario" });
   }
 });
 
-/* ============================================================
-   ====================== ACTUALIZAR USUARIO ==================
-   ============================================================ */
 router.put("/:id", auth, async (req, res) => {
   const {
-    nombre,
-    correo,
-    rut,
-    direccion,
-    telefono,
-    licencia,
-    departamento,
-    rol,
-    activo,
+    nombre, correo, rut, direccion, telefono,
+    licencia, departamento, rol, activo
   } = req.body || {};
 
   try {
     const exists = await db.query(
-      `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
+      "SELECT id FROM usuarios WHERE id=$1",
       [req.params.id]
     );
 
@@ -139,15 +203,9 @@ router.put("/:id", auth, async (req, res) => {
     await db.query(
       `
       UPDATE usuarios SET
-        nombre=$1,
-        correo=$2,
-        rut=$3,
-        direccion=$4,
-        telefono=$5,
-        licencia=$6,
-        departamento=$7,
-        rol=$8,
-        activo=$9
+        nombre=$1, correo=$2, rut=$3, direccion=$4,
+        telefono=$5, licencia=$6, departamento=$7,
+        rol=$8, activo=$9
       WHERE id=$10
       `,
       [
@@ -160,7 +218,7 @@ router.put("/:id", auth, async (req, res) => {
         departamento || "Municipalidad",
         rol || "Usuario",
         Boolean(activo),
-        req.params.id,
+        req.params.id
       ]
     );
 
@@ -171,88 +229,10 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-/* ============================================================
-   ==================== CAMBIAR CONTRASEÑA ====================
-   ============================================================ */
-router.put("/:id/password", auth, async (req, res) => {
-  const { password } = req.body || {};
-
-  if (!password) {
-    return res.status(400).json({ message: "Contraseña requerida" });
-  }
-
-  try {
-    const exists = await db.query(
-      `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
-      [req.params.id]
-    );
-
-    if (!exists.rows.length) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    const hash = await bcrypt.hash(password, 12);
-
-    await db.query(`UPDATE usuarios SET password_hash=$1 WHERE id=$2`, [
-      hash,
-      req.params.id,
-    ]);
-
-    res.json({ ok: true });
-  } catch (err) {
-    console.error("❌ Error PUT /usuarios/:id/password:", err);
-    res.status(500).json({ message: "Error al actualizar contraseña" });
-  }
-});
-
-/* ============================================================
-   ========== CAMBIAR CONTRASEÑA DEL USUARIO LOGUEADO ==========
-   ============================================================ */
-router.post("/change-password", auth, async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Datos incompletos." });
-    }
-
-    const result = await db.query(
-      `SELECT password_hash FROM usuarios WHERE id = $1 LIMIT 1`,
-      [req.user.id]
-    );
-
-    if (!result.rows.length) {
-      return res.status(404).json({ message: "Usuario no encontrado." });
-    }
-
-    const currentUser = result.rows[0];
-
-    const valid = await bcrypt.compare(oldPassword, currentUser.password_hash);
-    if (!valid) {
-      return res.status(401).json({ message: "Contraseña actual incorrecta." });
-    }
-
-    const hash = await bcrypt.hash(newPassword, 12);
-
-    await db.query(
-      `UPDATE usuarios SET password_hash = $1 WHERE id = $2`,
-      [hash, req.user.id]
-    );
-
-    res.json({ message: "Contraseña actualizada correctamente." });
-  } catch (err) {
-    console.error("❌ Error POST /usuarios/change-password:", err);
-    res.status(500).json({ message: "Error interno del servidor" });
-  }
-});
-
-/* ============================================================
-   ========================= ELIMINAR ==========================
-   ============================================================ */
 router.delete("/:id", auth, async (req, res) => {
   try {
     const exists = await db.query(
-      `SELECT id FROM usuarios WHERE id=$1 LIMIT 1`,
+      "SELECT id FROM usuarios WHERE id=$1",
       [req.params.id]
     );
 
