@@ -24,7 +24,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       const form = new FormData();
       form.append("foto", file);
 
-      const res = await api.post("/usuarios/upload-photo", form);
+      const res = await api.post("/users/upload-photo", form);
 
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
