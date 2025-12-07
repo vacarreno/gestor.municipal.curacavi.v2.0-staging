@@ -357,16 +357,16 @@ doc.moveDown(1.5);
     /* =============================== */
     doc.moveDown(3);
 
-    doc.text("_____________________________", L());
-    doc.text(`Conductor: ${data.conductor}`, L() + 15);
+    // Firma Conductor (lado izquierdo)
+doc.text("_____________________________", 50, y);
+doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
 
-    if (data.rut_conductor)
-      doc.text(`RUT: ${data.rut_conductor}`, L() + 15, doc.y + 2);
+if (data.rut_conductor)
+  doc.text(`RUT: ${data.rut_conductor}`, 50, y + 30);
 
-    doc.moveDown(2);
-
-    doc.text("_____________________________", L() + 260);
-    doc.text("Supervisor:", L() + 270);
+// Firma Supervisor (lado derecho)
+doc.text("_____________________________", 320, y);
+doc.text("Supervisor:", 330, y + 15);
 
     /* =============================== */
     /*          PAGINACIÓN             */
