@@ -7,15 +7,16 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
   const [fotoPreview, setFotoPreview] = useState(
-    user?.foto || "/default-user.png"
+    user?.foto ? `${user.foto}?v=${Date.now()}` : "/default-user.png"
   );
+
   const [file, setFile] = useState(null);
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [msg, setMsg] = useState("");
 
   /* ===============================
-     SUBIR FOTO (Ruta corregida)
+     SUBIR FOTO
   =============================== */
   const subirFoto = async () => {
     try {
@@ -27,13 +28,14 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       // RUTA CORRECTA DEL BACKEND
       const res = await api.post("/usuarios/upload-photo", form);
 
+      // Actualizar usuario en sessionStorage
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
 
-      // ACTUALIZAR PREVIEW
-      setFotoPreview(res.data.url);
+      // Preview con cache-buster
+      setFotoPreview(`${res.data.url}?v=${Date.now()}`);
 
-      // Notificar navbar
+      // Avisar al navbar
       if (onUserUpdate) onUserUpdate({ ...user });
 
       setMsg("Foto actualizada.");
