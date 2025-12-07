@@ -3,8 +3,13 @@ import axios from "axios";
 // ===============================
 // CONFIG AXIOS
 // ===============================
-const api = axios.create({
+/*const api = axios.create({
   baseURL: "https://curacavi-backend.onrender.com",
+  withCredentials: true,
+});*/
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
