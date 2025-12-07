@@ -365,6 +365,10 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     doc.moveDown(20);
 
     // Firma Conductor (lado izquierdo)
+    doc.text("");
+
+    doc.moveDown(20);
+// Firma Conductor (lado izquierdo)
     doc.text("_____________________________", 50, y);
     doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
 
@@ -373,6 +377,8 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     // Firma Supervisor (lado derecho)
     doc.text("_____________________________", 320, y);
     doc.text("Supervisor:", 330, y + 15);
+
+
 
     /* =============================== */
     /*          PAGINACIÓN             */
