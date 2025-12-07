@@ -13,11 +13,24 @@ const router = express.Router();
    ============ CONFIG SUBIDA DE FOTOS (MULTER)
    ============================================================ */
 
-const uploadDir = path.join(__dirname, "..", "uploads");
+/*
+  Render borra todo el filesystem en cada deploy.
+  Para mantener las fotos, debes usar el disco persistente:
+  /var/data/uploads
+*/
+
+const uploadDir =
+  process.env.NODE_ENV === "production"
+    ? "/var/data/uploads"
+    : path.join(__dirname, "..", "uploads");
+
+// Crear carpeta si no existe
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("✔ Carpeta creada:", uploadDir);
 }
 
+// Storage para multer
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, uploadDir),
   filename: (_, file, cb) => {
@@ -53,10 +66,13 @@ router.get("/", auth, async (_req, res) => {
    ============================================================ */
 router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "No se envió archivo" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No se envió archivo" });
+    }
 
     console.log("=== DEBUG SUBIDA FOTO ===");
     console.log("BASE_URL:", process.env.BASE_URL);
+    console.log("UPLOAD DIR:", uploadDir);
     console.log("FILENAME:", req.file.filename);
 
     const url = `${process.env.BASE_URL}/uploads/${req.file.filename}`;

@@ -65,9 +65,17 @@ app.options(/.*/, (req, res) => {
 });
 
 // ========================================================
-// =========== SERVIR FOTOS DE PERFIL =====================
+// ======= SERVIR FOTOS DESDE DISCO PERSISTENTE ===========
 // ========================================================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static("/var/data/uploads"));
+
+// ========================================================
+// === OPCIONAL: SERVIR LA CARPETA LOCAL EN DESARROLLO ====
+// ========================================================
+if (!isProd) {
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  console.log("📁 Modo desarrollo: usando /uploads local");
+}
 
 // ========================================================
 // ====================== ROUTER MAP ======================
@@ -75,7 +83,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/usuarios", require("./routes/usuarioRoutes"));
 app.use("/conductores", require("./routes/conductorRoutes"));
-app.use("/users", require("./routes/userProfileRoutes"));  // subir foto + perfil
+app.use("/users", require("./routes/userProfileRoutes"));
 app.use("/vehiculos", require("./routes/vehiculoRoutes"));
 app.use("/inspecciones", require("./routes/inspeccionRoutes"));
 app.use("/mantenciones", require("./routes/mantencionesPdfRoutes"));
@@ -93,6 +101,7 @@ app.get("/", (_, res) => {
     env: NODE_ENV,
     baseUrl: process.env.BASE_URL,
     db: process.env.DB_NAME,
+    uploadsPath: "/var/data/uploads",
     time: new Date().toISOString(),
   });
 });
@@ -112,6 +121,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
   console.log(`🌐 Entorno: ${NODE_ENV}`);
   console.log(`🌍 CORS permitido: ${allowedDomains.join(", ")}`);
+  console.log(`📸 Servir fotos desde: /var/data/uploads`);
   console.log(`🌎 BASE_URL: ${process.env.BASE_URL}`);
   console.log(`✅ Base de datos: ${process.env.DB_NAME}`);
 });
