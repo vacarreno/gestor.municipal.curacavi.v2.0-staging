@@ -12,8 +12,8 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const isProd = NODE_ENV === "production";
 
 const allowedDomains = [
-  "https://curacavi-frontend.onrender.com",
-  "http://localhost:5173"
+  "https://back-staging-upw5.onrender.com",
+  "http://localhost:5173",
 ].filter(Boolean);
 
 const app = express();
@@ -26,7 +26,7 @@ app.use(
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" }  // 🔥 IMPORTANTE
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // 🔥 IMPORTANTE
   })
 );
 app.use(compression());
@@ -50,11 +50,14 @@ app.use(
   "/uploads",
   express.static(
     isProd
-      ? "/var/data/uploads"                // Render Disk persistente
-      : path.join(__dirname, "uploads")    // Carpeta local
+      ? "/var/data/uploads" // Render Disk persistente
+      : path.join(__dirname, "uploads") // Carpeta local
   )
 );
-console.log("📁 Servir /uploads desde:", isProd ? "/var/data/uploads" : path.join(__dirname, "uploads"));
+console.log(
+  "📁 Servir /uploads desde:",
+  isProd ? "/var/data/uploads" : path.join(__dirname, "uploads")
+);
 
 // =================== CORS ====================
 app.use(
@@ -123,7 +126,11 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
   console.log(`🌐 Entorno: ${NODE_ENV}`);
   console.log(`🌍 CORS permitido: ${allowedDomains.join(", ")}`);
-  console.log(`📸 Fotos desde: ${isProd ? "/var/data/uploads" : path.join(__dirname, "uploads")}`);
+  console.log(
+    `📸 Fotos desde: ${
+      isProd ? "/var/data/uploads" : path.join(__dirname, "uploads")
+    }`
+  );
   console.log(`🌎 BASE_URL: ${process.env.BASE_URL}`);
   console.log(`✅ Base de datos: ${process.env.DB_NAME}`);
 });
