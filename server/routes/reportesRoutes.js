@@ -189,7 +189,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         console.error("Error procesando imagen:", err);
       }
     }
-
+     doc.moveDown(1.5);
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
     /* =============================== */
