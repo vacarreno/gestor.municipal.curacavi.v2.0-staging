@@ -15,7 +15,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
   const [msg, setMsg] = useState("");
 
   /* ===============================
-     SUBIR FOTO
+     SUBIR FOTO (Ruta corregida)
   =============================== */
   const subirFoto = async () => {
     try {
@@ -24,23 +24,27 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       const form = new FormData();
       form.append("foto", file);
 
-      const res = await api.post("/users/upload-photo", form);
+      // RUTA CORRECTA DEL BACKEND
+      const res = await api.post("/usuarios/upload-photo", form);
 
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
 
-      // Notificar cambio al navbar
+      // ACTUALIZAR PREVIEW
+      setFotoPreview(res.data.url);
+
+      // Notificar navbar
       if (onUserUpdate) onUserUpdate({ ...user });
 
       setMsg("Foto actualizada.");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMsg("Error subiendo foto.");
     }
   };
 
   /* ===============================
      CAMBIO DE CONTRASEÑA
-     (Ruta corregida)
   =============================== */
   const cambiarPass = async () => {
     try {
@@ -50,7 +54,8 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
       });
 
       setMsg("Contraseña actualizada correctamente.");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMsg("Error al cambiar contraseña.");
     }
   };
@@ -93,7 +98,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                     borderRadius: "50%",
                     objectFit: "cover",
                     border: "3px solid #ddd",
-                    boxShadow: "0px 0px 8px rgba(0,0,0,0.2)",
+                    boxShadow: "0px 0px 8px rgba(0,0,0,0.2)"
                   }}
                 />
 
@@ -102,9 +107,9 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
                   className="form-control mt-2"
                   accept="image/*"
                   onChange={(e) => {
-                    const file = e.target.files[0];
-                    setFile(file);
-                    setFotoPreview(URL.createObjectURL(file));
+                    const f = e.target.files[0];
+                    setFile(f);
+                    setFotoPreview(URL.createObjectURL(f));
                   }}
                 />
 
