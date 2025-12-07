@@ -1,0 +1,139 @@
+import { useState } from "react";
+import api from "../api/http";
+
+export default function UserProfileModal({ show, onHide }) {
+  if (!show) return null;
+
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+
+  const [fotoPreview, setFotoPreview] = useState(user?.foto || "/default-user.png");
+  const [file, setFile] = useState(null);
+  const [oldPass, setOldPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [msg, setMsg] = useState("");
+
+  const subirFoto = async () => {
+    try {
+      if (!file) return;
+
+      const form = new FormData();
+      form.append("foto", file);
+
+      const res = await api.post("/users/upload-photo", form);
+      
+      user.foto = res.data.url;
+      sessionStorage.setItem("user", JSON.stringify(user));
+      setMsg("Foto actualizada.");
+    } catch (err) {
+      setMsg("Error subiendo foto.");
+    }
+  };
+
+  const cambiarPass = async () => {
+    try {
+      const res = await api.post("/auth/change-password", {
+        oldPassword: oldPass,
+        newPassword: newPass
+      });
+
+      setMsg("Contraseña actualizada correctamente.");
+    } catch (err) {
+      setMsg("Error al cambiar contraseña.");
+    }
+  };
+
+  return (
+    <div
+      className="modal-backdrop fade show"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.6)",
+        zIndex: 5000
+      }}
+      onClick={onHide}
+    >
+      <div
+        className="modal-dialog modal-dialog-centered"
+        style={{ maxWidth: "420px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-content p-3">
+
+          <div className="modal-header">
+            <h5 className="modal-title">Mi Perfil</h5>
+            <button className="btn-close" onClick={onHide}></button>
+          </div>
+
+          <div className="modal-body">
+
+            {/* FOTO */}
+            <div className="text-center mb-3">
+              <img
+                src={fotoPreview}
+                alt="Foto Usuario"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "3px solid #ddd"
+                }}
+              />
+
+              <input
+                type="file"
+                className="form-control mt-2"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setFile(file);
+                  setFotoPreview(URL.createObjectURL(file));
+                }}
+              />
+
+              <button className="btn btn-primary btn-sm mt-2" onClick={subirFoto}>
+                Actualizar Foto
+              </button>
+            </div>
+
+            {/* DATOS DEL USUARIO */}
+            <div className="mb-3">
+              <strong>Nombre:</strong> {user?.nombre} <br />
+              <strong>Usuario:</strong> {user?.username} <br />
+              <strong>Rol:</strong> {user?.rol}
+            </div>
+
+            <hr />
+
+            {/* CAMBIO DE CONTRASEÑA */}
+            <h6 className="fw-bold">Cambiar contraseña</h6>
+
+            <input
+              type="password"
+              className="form-control mt-2"
+              placeholder="Contraseña actual"
+              value={oldPass}
+              onChange={(e) => setOldPass(e.target.value)}
+            />
+
+            <input
+              type="password"
+              className="form-control mt-2"
+              placeholder="Nueva contraseña"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+            />
+
+            <button className="btn btn-warning mt-2 w-100" onClick={cambiarPass}>
+              Actualizar Contraseña
+            </button>
+
+            {msg && <div className="alert alert-info mt-3">{msg}</div>}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

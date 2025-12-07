@@ -246,19 +246,40 @@ export default function NavbarLayout() {
           <div className="text-muted small"></div>
 
           <div className="d-flex align-items-center gap-3">
-            <div className="d-flex align-items-center gap-2 text-secondary fw-semibold">
-              <PersonCircle size={20} />
-              {user?.nombre || user?.username || "Usuario"}
-              <span className="text-muted small">({rol})</span>
-            </div>
 
-            <button
-              className="btn btn-sm btn-outline-secondary"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
-          </div>
+  {/* FOTO REAL DEL USUARIO */}
+  <img
+    src={user?.foto || "/default-user.png"}
+    alt="Foto Usuario"
+    onClick={() => setShowProfile(true)}
+    style={{
+      width: "36px",
+      height: "36px",
+      borderRadius: "50%",
+      objectFit: "cover",
+      cursor: "pointer",
+      border: "2px solid #ccc"
+    }}
+  />
+
+  {/* NOMBRE + ROL */}
+  <div
+    className="d-flex align-items-center gap-2 text-secondary fw-semibold"
+    style={{ cursor: "pointer" }}
+    onClick={() => setShowProfile(true)}
+  >
+    {user?.nombre || user?.username || "Usuario"}
+    <span className="text-muted small">({rol})</span>
+  </div>
+
+  <button
+    className="btn btn-sm btn-outline-secondary"
+    onClick={handleLogout}
+  >
+    Cerrar sesión
+  </button>
+</div>
+
         </header>
 
         <main className="content flex-grow-1">
