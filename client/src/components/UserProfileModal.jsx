@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../api/http";
 
-export default function UserProfileModal({ show, onHide }) {
+export default function UserProfileModal({ show, onHide, onUserUpdate }) {
   if (!show) return null;
 
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -24,6 +24,8 @@ export default function UserProfileModal({ show, onHide }) {
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
 
+      if (onUserUpdate) onUserUpdate({ ...user });
+
       setMsg("Foto actualizada.");
     } catch (err) {
       setMsg("Error subiendo foto.");
@@ -45,23 +47,15 @@ export default function UserProfileModal({ show, onHide }) {
 
   return (
     <>
-      {/* BACKDROP */}
       <div
         className="modal-backdrop fade show"
-        style={{
-          zIndex: 2000,
-          backdropFilter: "blur(3px)"
-        }}
+        style={{ zIndex: 2000, backdropFilter: "blur(3px)" }}
         onClick={onHide}
       />
 
-      {/* MODAL */}
       <div
         className="modal fade show"
-        style={{
-          display: "block",
-          zIndex: 3000
-        }}
+        style={{ display: "block", zIndex: 3000 }}
         onClick={onHide}
       >
         <div
@@ -78,7 +72,6 @@ export default function UserProfileModal({ show, onHide }) {
 
             <div className="modal-body">
 
-              {/* FOTO */}
               <div className="text-center mb-3">
                 <img
                   src={fotoPreview}
@@ -117,7 +110,6 @@ export default function UserProfileModal({ show, onHide }) {
 
               <hr />
 
-              {/* CAMBIO DE CONTRASEÑA */}
               <h6 className="fw-bold">Cambiar contraseña</h6>
 
               <input
