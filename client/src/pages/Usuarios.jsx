@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Modal, Button, Form, Table, Spinner } from "react-bootstrap";
 import api from "../api/http";
+import ModalChangePassword from "../components/ModalChangePassword";
+
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
