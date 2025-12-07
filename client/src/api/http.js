@@ -5,10 +5,7 @@ import axios from "axios";
 // ===============================
 const api = axios.create({
   baseURL: "https://curacavi-backend.onrender.com",
-   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: true,
 });
 
 // ===============================
@@ -17,6 +14,15 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  // SOLO usar JSON si NO es FormData
+  if (!(config.data instanceof FormData)) {
+    config.headers["Content-Type"] = "application/json";
+  } else {
+    // Axios se encarga del boundary automáticamente
+    delete config.headers["Content-Type"];
+  }
+
   return config;
 });
 
@@ -48,7 +54,7 @@ api.interceptors.response.use(
     // Backend no responde
     if (!err.response) return Promise.reject("Servidor no disponible");
 
-    // Mensaje corporativo unificado
+    // Mensaje corporativo
     const msg =
       err.response.data?.message ||
       err.response.data?.error ||
