@@ -120,6 +120,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     /* =============================== */
     /*     DATOS GENERALES INSPECCIÓN  */
     /* =============================== */
+    doc.moveDown(1.2);
     doc
       .font("Helvetica-Bold")
       .fillColor("#003366")
@@ -191,7 +192,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         console.error("Error procesando imagen:", err);
       }
     }
-    doc.moveDown(6);
+    doc.moveDown(10);
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
     /* =============================== */
