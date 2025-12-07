@@ -8,11 +8,10 @@ import {
   ClipboardCheck,
   Gear,
   PersonFillGear,
-  PersonCircle,
   Wrench,
   Wallet,
   Wallet2,
-  List
+  List,
 } from "react-bootstrap-icons";
 
 import UserProfileModal from "../components/UserProfileModal";
@@ -23,7 +22,6 @@ export default function NavbarLayout() {
   const [showBilletera, setShowBilletera] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // Usuario desde sessionStorage (mantiene persistencia)
   const [user, setUser] = useState(() =>
     JSON.parse(sessionStorage.getItem("user") || "{}")
   );
@@ -38,12 +36,9 @@ export default function NavbarLayout() {
 
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
-
-      {/* Botón hamburguesa */}
       {!navOpen && (
         <button
           className="hamburger btn btn-light"
-          aria-label="Abrir menú"
           onClick={() => setNavOpen(true)}
           style={{
             position: "fixed",
@@ -58,30 +53,21 @@ export default function NavbarLayout() {
         </button>
       )}
 
-      {/* Sidebar */}
       <aside
         className={`sidebar ${navOpen ? "show" : ""}`}
-        role="navigation"
-        style={{
-          backgroundColor: "#1E3A5F",
-          color: "#fff",
-          minHeight: "100vh",
-        }}
+        style={{ backgroundColor: "#1E3A5F", color: "#fff", minHeight: "100vh" }}
       >
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <strong style={{ color: "#fff" }}>GESTOR MUNICIPAL</strong>
-
+          <strong>GESTOR MUNICIPAL</strong>
           <button
             className="btn btn-sm btn-outline-light d-lg-none"
             onClick={() => setNavOpen(false)}
-            aria-label="Cerrar menú"
           >
             ✕
           </button>
         </div>
 
         <nav className="d-grid gap-2" onClick={() => setNavOpen(false)}>
-
           {(rol === "admin" || rol === "Supervisor") && (
             <NavLink
               to="/dashboard"
@@ -172,10 +158,8 @@ export default function NavbarLayout() {
           {(rol === "adminbilletera" || rol === "admin") && (
             <div className="config-menu mt-2">
               <button
-                type="button"
                 className="btn btn-link text-start p-0 w-100 d-flex align-items-center gap-2 text-white"
                 onClick={() => setShowBilletera(!showBilletera)}
-                style={{ textDecoration: "none", fontWeight: "bold" }}
               >
                 <Wallet /> Billetera
               </button>
@@ -200,10 +184,8 @@ export default function NavbarLayout() {
           {rol === "admin" && (
             <div className="config-menu mt-2">
               <button
-                type="button"
                 className="btn btn-link text-start p-0 w-100 d-flex align-items-center gap-2 text-white"
                 onClick={() => setShowConfig(!showConfig)}
-                style={{ textDecoration: "none", fontWeight: "bold" }}
               >
                 <Gear /> Configuración
               </button>
@@ -227,25 +209,17 @@ export default function NavbarLayout() {
         </nav>
       </aside>
 
-      {/* Fondo oscuro para cerrar menú */}
       <div
         className={`backdrop ${navOpen ? "show" : ""}`}
         onClick={() => setNavOpen(false)}
       />
 
-      {/* Contenido principal */}
       <div className="d-flex flex-column">
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
-
           <div className="d-flex align-items-center gap-3">
-
-            {/* FOTO USUARIO con cache-buster */}
             <img
-              src={
-                user?.foto
-                  ? `${user.foto}?v=${Date.now()}`
-                  : "/default-user.png"
-              }
+              key={user?.foto}    // <--- fuerza re-render sin query param
+              src={user?.foto || "/default-user.png"}
               alt="Foto Usuario"
               onClick={() => setShowProfile(true)}
               style={{
@@ -258,7 +232,6 @@ export default function NavbarLayout() {
               }}
             />
 
-            {/* Nombre + rol */}
             <div
               className="d-flex align-items-center gap-2 text-secondary fw-semibold"
               style={{ cursor: "pointer" }}
@@ -286,7 +259,6 @@ export default function NavbarLayout() {
         </footer>
       </div>
 
-      {/* Modal de perfil */}
       <UserProfileModal
         show={showProfile}
         onHide={() => setShowProfile(false)}
