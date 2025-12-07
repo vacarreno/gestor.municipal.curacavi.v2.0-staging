@@ -110,10 +110,11 @@ export default function Login() {
             src="/logo.png"
             alt="Logo Municipal"
             style={{
-              width: "150px",
-              height: "150px",
+              width: "30vw", // escala según ancho de la pantalla
+              maxWidth: "260px", // límite máximo para no deformar el layout
+              height: "auto", // mantiene proporción
               objectFit: "contain",
-              marginBottom: "10px",
+              marginBottom: "15px",
             }}
           />
           <h4 className="fw-bold text-primary mb-1">Gestor Municipal</h4>
