@@ -7,10 +7,10 @@ const auth = require("../middleware/auth");
 
 const router = express.Router();
 
-// === DIRECTORIO ABSOLUTO SEGURO PARA RENDER ===
+// === DIRECTORIO ABSOLUTO ===
 const uploadDir = path.join(__dirname, "..", "uploads");
 
-// Crear carpeta si no existe (Render permite creación dentro del runtime)
+// Crear carpeta si no existe
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -28,13 +28,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ======================================
-// ========= SUBIR FOTO PERFIL ==========
-// ======================================
+/* ======================================
+   ========== SUBIR FOTO PERFIL ==========
+   ====================================== */
 router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
   try {
-    
-    // === LOGS DE DIAGNÓSTICO ===
     console.log("========== UPLOAD DEBUG ==========");
     console.log("Content-Type:", req.headers["content-type"]);
     console.log("req.file:", req.file);

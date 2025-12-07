@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
     // POSTGRESQL QUERY
     const result = await db.query(
       `
-      SELECT id, username, nombre, correo, rol, password_hash
+      SELECT id, username, nombre, correo, rol, foto, password_hash
       FROM usuarios
       WHERE username = $1
       LIMIT 1
@@ -54,6 +54,7 @@ router.post("/login", async (req, res) => {
         nombre: user.nombre,
         correo: user.correo,
         rol: user.rol,
+        foto: user.foto
       },
     });
 

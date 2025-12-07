@@ -1,7 +1,7 @@
 // routes/usuarioRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { db } = require("../config/db"); // ✅ Mismo patrón que vehiculoRoutes
+const { db } = require("../config/db");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.get("/", auth, async (_req, res) => {
     const result = await db.query(`
       SELECT 
         id, username, nombre, correo, rol, activo,
-        rut, direccion, telefono, licencia, departamento
+        rut, direccion, telefono, licencia, departamento, foto
       FROM usuarios
       ORDER BY id DESC
     `);
@@ -34,7 +34,7 @@ router.get("/conductores", auth, async (_req, res) => {
     const result = await db.query(`
       SELECT 
         id, username, nombre, correo, rol, activo,
-        rut, direccion, telefono, licencia, departamento
+        rut, direccion, telefono, licencia, departamento, foto
       FROM usuarios
       WHERE LOWER(rol) = 'conductor' AND activo = true
       ORDER BY nombre ASC
@@ -65,13 +65,10 @@ router.post("/", auth, async (req, res) => {
   } = req.body || {};
 
   if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: "Usuario y contraseña son obligatorios" });
+    return res.status(400).json({ message: "Usuario y contraseña son obligatorios" });
   }
 
   try {
-    // Validar duplicado
     const exists = await db.query(
       `SELECT id FROM usuarios WHERE username=$1 LIMIT 1`,
       [username.trim()]
@@ -87,9 +84,9 @@ router.post("/", auth, async (req, res) => {
       `
       INSERT INTO usuarios (
         username, nombre, correo, rut, direccion, telefono, licencia,
-        departamento, rol, password_hash, activo
+        departamento, rol, password_hash, activo, foto
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true,NULL)
       RETURNING id
       `,
       [
@@ -209,6 +206,47 @@ router.put("/:id/password", auth, async (req, res) => {
 });
 
 /* ============================================================
+   ========== CAMBIAR CONTRASEÑA DEL USUARIO LOGUEADO ==========
+   ============================================================ */
+router.post("/change-password", auth, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Datos incompletos." });
+    }
+
+    const result = await db.query(
+      `SELECT password_hash FROM usuarios WHERE id = $1 LIMIT 1`,
+      [req.user.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const currentUser = result.rows[0];
+
+    const valid = await bcrypt.compare(oldPassword, currentUser.password_hash);
+    if (!valid) {
+      return res.status(401).json({ message: "Contraseña actual incorrecta." });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 12);
+
+    await db.query(
+      `UPDATE usuarios SET password_hash = $1 WHERE id = $2`,
+      [hash, req.user.id]
+    );
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("❌ Error POST /usuarios/change-password:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+/* ============================================================
    ========================= ELIMINAR ==========================
    ============================================================ */
 router.delete("/:id", auth, async (req, res) => {
@@ -228,50 +266,6 @@ router.delete("/:id", auth, async (req, res) => {
   } catch (err) {
     console.error("❌ Error DELETE /usuarios/:id:", err);
     res.status(500).json({ message: "Error al eliminar usuario" });
-  }
-});
-
-/* ============================================================
-   ========== CAMBIAR CONTRASEÑA DEL USUARIO LOGUEADO ==========
-   ============================================================ */
-router.post("/change-password", auth, async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Datos incompletos." });
-    }
-
-    // Obtener usuario actual
-    const result = await db.query(
-      "SELECT password_hash FROM usuarios WHERE id = $1 LIMIT 1",
-      [req.user.id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado." });
-    }
-
-    const user = result.rows[0];
-
-    // Validar contraseña anterior
-    const valid = await bcrypt.compare(oldPassword, user.password_hash);
-    if (!valid) {
-      return res.status(401).json({ message: "Contraseña actual incorrecta." });
-    }
-
-    // Generar nuevo hash
-    const hash = await bcrypt.hash(newPassword, 12);
-
-    await db.query("UPDATE usuarios SET password_hash = $1 WHERE id = $2", [
-      hash,
-      req.user.id,
-    ]);
-
-    res.json({ message: "Contraseña actualizada correctamente." });
-  } catch (err) {
-    console.error("❌ Error en POST /usuarios/change-password:", err);
-    res.status(500).json({ message: "Error interno del servidor" });
   }
 });
 
