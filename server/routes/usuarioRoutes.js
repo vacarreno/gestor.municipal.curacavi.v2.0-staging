@@ -13,12 +13,7 @@ const router = express.Router();
    ============ CONFIG SUBIDA DE FOTOS (MULTER)
    ============================================================ */
 
-/*
-  Render borra todo el filesystem en cada deploy.
-  Para mantener las fotos, debes usar el disco persistente:
-  /var/data/uploads
-*/
-
+// En producción usamos el disco persistente de Render
 const uploadDir =
   process.env.NODE_ENV === "production"
     ? "/var/data/uploads"
@@ -30,7 +25,7 @@ if (!fs.existsSync(uploadDir)) {
   console.log("✔ Carpeta creada:", uploadDir);
 }
 
-// Storage para multer
+// Storage Multer
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, uploadDir),
   filename: (_, file, cb) => {
@@ -40,6 +35,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+// Fix BASE_URL seguro
+const BASE = process.env.BASE_URL || "https://curacavi-backend.onrender.com";
 
 /* ============================================================
    =============== LISTAR TODOS LOS USUARIOS ===================
@@ -71,11 +69,12 @@ router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
     }
 
     console.log("=== DEBUG SUBIDA FOTO ===");
-    console.log("BASE_URL:", process.env.BASE_URL);
+    console.log("BASE_URL:", BASE);
     console.log("UPLOAD DIR:", uploadDir);
     console.log("FILENAME:", req.file.filename);
 
-    const url = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+    // Construir URL final donde será servida la imagen
+    const url = `${BASE}/uploads/${req.file.filename}`;
 
     await db.query(
       "UPDATE usuarios SET foto = $1 WHERE id = $2",
@@ -131,7 +130,7 @@ router.post("/change-password", auth, async (req, res) => {
 });
 
 /* ============================================================
-   ================ RESTO DEL CRUD (INTACTO) ===================
+   ==================== RESTO DEL CRUD =========================
    ============================================================ */
 
 router.get("/conductores", auth, async (_req, res) => {
