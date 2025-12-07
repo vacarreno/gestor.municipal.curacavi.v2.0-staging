@@ -73,7 +73,6 @@ router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
     console.log("UPLOAD DIR:", uploadDir);
     console.log("FILENAME:", req.file.filename);
 
-    // Construir URL final donde será servida la imagen
     const url = `${BASE}/uploads/${req.file.filename}`;
 
     await db.query(
@@ -271,7 +270,8 @@ router.delete("/:id", auth, async (req, res) => {
 /* ============================================================
    === CAMBIO DE CONTRASEÑA PARA USUARIOS ADMINISTRADOS =======
    ============================================================ */
-router.post("/:id/password", auth, async (req, res) => {
+// *** CORREGIDO: EL FRONTEND USA PUT, NO POST ***
+router.put("/:id/password", auth, async (req, res) => {
   try {
     const { newPassword } = req.body;
     const { id } = req.params;
@@ -299,7 +299,7 @@ router.post("/:id/password", auth, async (req, res) => {
     res.json({ message: "Contraseña actualizada correctamente." });
 
   } catch (err) {
-    console.error("❌ Error POST /usuarios/:id/password:", err);
+    console.error("❌ Error PUT /usuarios/:id/password:", err);
     res.status(500).json({ message: "Error interno" });
   }
 });
