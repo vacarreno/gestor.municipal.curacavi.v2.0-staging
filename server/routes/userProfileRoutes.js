@@ -7,12 +7,18 @@ const auth = require("../middleware/auth");
 
 const router = express.Router();
 
-// Storage para fotos
+// === DIRECTORIO ABSOLUTO SEGURO PARA RENDER ===
+const uploadDir = path.join(__dirname, "..", "uploads");
+
+// Crear carpeta si no existe (Render permite creación dentro del runtime)
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// === STORAGE MULTER ===
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "..", "uploads");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const unique = Date.now() + "-" + file.originalname.replace(/\s+/g, "_");
@@ -27,8 +33,11 @@ const upload = multer({ storage });
 // ======================================
 router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No se envió archivo." });
+    if (!req.file) {
+      return res.status(400).json({ error: "No se envió archivo." });
+    }
 
+    // URL pública correcta
     const fileUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
 
     await db.query(
@@ -37,6 +46,7 @@ router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
     );
 
     res.json({ url: fileUrl });
+
   } catch (err) {
     console.error("❌ Error subiendo foto:", err);
     res.status(500).json({ error: "Error interno al subir foto" });

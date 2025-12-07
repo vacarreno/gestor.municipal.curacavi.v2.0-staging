@@ -5,41 +5,26 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const compression = require("compression");
+const path = require("path");
 require("dotenv").config();
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 const isProd = NODE_ENV === "production";
 
-// ========================================================
-// ================= CONFIGURACIÓN BASE ===================
-// ========================================================
-
-const allowedDomains = ["https://curacavi-frontend.onrender.com"].filter(
-  Boolean
-);
+const allowedDomains = ["https://curacavi-frontend.onrender.com"].filter(Boolean);
 
 const app = express();
 app.set("trust proxy", 1);
 
-// ========================================================
 // =================== MIDDLEWARE CORE ====================
-// ========================================================
-
-// Logging
 app.use(morgan(isProd ? "combined" : "dev"));
-
-// Seguridad
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   })
 );
-
-// Compresión
 app.use(compression());
-
-// Rate Limit
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -50,11 +35,10 @@ app.use(
   })
 );
 
-// Body Parsers
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// CORS Controlado
+// =================== CORS ====================
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -70,7 +54,6 @@ app.use(
   })
 );
 
-// PREFLIGHT (Express v5)
 app.options(/.*/, (req, res) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
@@ -78,18 +61,14 @@ app.options(/.*/, (req, res) => {
   return res.sendStatus(204);
 });
 
-// Debug Local
-if (!isProd) {
-  app.use((req, _, next) => {
-    console.log(`[DEBUG] ${req.method} ${req.originalUrl}`);
-    next();
-  });
-}
+// ========================================================
+// =========== SERVIR FOTOS DE PERFIL (MUY IMPORTANTE) ====
+// ========================================================
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ========================================================
 // ====================== ROUTER MAP ======================
 // ========================================================
-// Ordenado por categoría / módulo para evitar colisiones
 
 // --- Autenticación / Seguridad ---
 app.use("/auth", require("./routes/authRoutes"));
@@ -98,19 +77,22 @@ app.use("/auth", require("./routes/authRoutes"));
 app.use("/usuarios", require("./routes/usuarioRoutes"));
 app.use("/conductores", require("./routes/conductorRoutes"));
 
+// --- Perfil / Foto Usuario (DEBE IR AQUÍ, NO AL FINAL) ---
+app.use("/users", require("./routes/userProfileRoutes"));  // ✔️ Corregido
+
 // --- Flota Vehicular ---
 app.use("/vehiculos", require("./routes/vehiculoRoutes"));
 app.use("/inspecciones", require("./routes/inspeccionRoutes"));
 
-// --- Mantenciones (específico → general) ---
+// --- Mantenciones ---
 app.use("/mantenciones", require("./routes/mantencionesPdfRoutes"));
 app.use("/mantenciones", require("./routes/mantencionesRoutes"));
 
 // --- Reportes ---
 app.use("/reportes", require("./routes/reportesRoutes"));
 
-// --- Billetera Vecinal (NUEVO) ---
-app.use("/billetera", require("./routes/billeteraRoutes"));  
+// --- Billetera ---
+app.use("/billetera", require("./routes/billeteraRoutes"));
 
 // ========================================================
 // ====================== HEALTHCHECK =====================
@@ -133,7 +115,7 @@ app.use(/.*/, (_, res) => {
 });
 
 // ========================================================
-// =================== INICIO SERVIDOR ====================
+// ==================== INICIO SERVIDOR ===================
 // ========================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => {

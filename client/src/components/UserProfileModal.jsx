@@ -20,9 +20,10 @@ export default function UserProfileModal({ show, onHide }) {
       form.append("foto", file);
 
       const res = await api.post("/users/upload-photo", form);
-      
+
       user.foto = res.data.url;
       sessionStorage.setItem("user", JSON.stringify(user));
+
       setMsg("Foto actualizada.");
     } catch (err) {
       setMsg("Error subiendo foto.");
@@ -31,7 +32,7 @@ export default function UserProfileModal({ show, onHide }) {
 
   const cambiarPass = async () => {
     try {
-      const res = await api.post("/auth/change-password", {
+      await api.post("/auth/change-password", {
         oldPassword: oldPass,
         newPassword: newPass
       });
@@ -43,97 +44,107 @@ export default function UserProfileModal({ show, onHide }) {
   };
 
   return (
-    <div
-      className="modal-backdrop fade show"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        zIndex: 5000
-      }}
-      onClick={onHide}
-    >
+    <>
+      {/* BACKDROP */}
       <div
-        className="modal-dialog modal-dialog-centered"
-        style={{ maxWidth: "420px" }}
-        onClick={(e) => e.stopPropagation()}
+        className="modal-backdrop fade show"
+        style={{
+          zIndex: 2000,
+          backdropFilter: "blur(3px)"
+        }}
+        onClick={onHide}
+      />
+
+      {/* MODAL */}
+      <div
+        className="modal fade show"
+        style={{
+          display: "block",
+          zIndex: 3000
+        }}
+        onClick={onHide}
       >
-        <div className="modal-content p-3">
+        <div
+          className="modal-dialog modal-dialog-centered"
+          style={{ maxWidth: "400px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-content p-3 shadow-lg">
 
-          <div className="modal-header">
-            <h5 className="modal-title">Mi Perfil</h5>
-            <button className="btn-close" onClick={onHide}></button>
-          </div>
+            <div className="modal-header">
+              <h5 className="modal-title">Mi Perfil</h5>
+              <button className="btn-close" onClick={onHide}></button>
+            </div>
 
-          <div className="modal-body">
+            <div className="modal-body">
 
-            {/* FOTO */}
-            <div className="text-center mb-3">
-              <img
-                src={fotoPreview}
-                alt="Foto Usuario"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "3px solid #ddd"
-                }}
+              {/* FOTO */}
+              <div className="text-center mb-3">
+                <img
+                  src={fotoPreview}
+                  alt="Foto Usuario"
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "3px solid #ddd",
+                    boxShadow: "0px 0px 8px rgba(0,0,0,0.2)"
+                  }}
+                />
+
+                <input
+                  type="file"
+                  className="form-control mt-2"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    setFile(file);
+                    setFotoPreview(URL.createObjectURL(file));
+                  }}
+                />
+
+                <button className="btn btn-primary btn-sm mt-2" onClick={subirFoto}>
+                  Actualizar Foto
+                </button>
+              </div>
+
+              <div className="mb-3">
+                <strong>Nombre:</strong> {user?.nombre} <br />
+                <strong>Usuario:</strong> {user?.username} <br />
+                <strong>Rol:</strong> {user?.rol}
+              </div>
+
+              <hr />
+
+              {/* CAMBIO DE CONTRASEÑA */}
+              <h6 className="fw-bold">Cambiar contraseña</h6>
+
+              <input
+                type="password"
+                className="form-control mt-2"
+                placeholder="Contraseña actual"
+                value={oldPass}
+                onChange={(e) => setOldPass(e.target.value)}
               />
 
               <input
-                type="file"
+                type="password"
                 className="form-control mt-2"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  setFile(file);
-                  setFotoPreview(URL.createObjectURL(file));
-                }}
+                placeholder="Nueva contraseña"
+                value={newPass}
+                onChange={(e) => setNewPass(e.target.value)}
               />
 
-              <button className="btn btn-primary btn-sm mt-2" onClick={subirFoto}>
-                Actualizar Foto
+              <button className="btn btn-warning mt-3 w-100" onClick={cambiarPass}>
+                Actualizar Contraseña
               </button>
+
+              {msg && <div className="alert alert-info mt-3">{msg}</div>}
             </div>
-
-            {/* DATOS DEL USUARIO */}
-            <div className="mb-3">
-              <strong>Nombre:</strong> {user?.nombre} <br />
-              <strong>Usuario:</strong> {user?.username} <br />
-              <strong>Rol:</strong> {user?.rol}
-            </div>
-
-            <hr />
-
-            {/* CAMBIO DE CONTRASEÑA */}
-            <h6 className="fw-bold">Cambiar contraseña</h6>
-
-            <input
-              type="password"
-              className="form-control mt-2"
-              placeholder="Contraseña actual"
-              value={oldPass}
-              onChange={(e) => setOldPass(e.target.value)}
-            />
-
-            <input
-              type="password"
-              className="form-control mt-2"
-              placeholder="Nueva contraseña"
-              value={newPass}
-              onChange={(e) => setNewPass(e.target.value)}
-            />
-
-            <button className="btn btn-warning mt-2 w-100" onClick={cambiarPass}>
-              Actualizar Contraseña
-            </button>
-
-            {msg && <div className="alert alert-info mt-3">{msg}</div>}
           </div>
-
         </div>
       </div>
-    </div>
+    </>
   );
 }
