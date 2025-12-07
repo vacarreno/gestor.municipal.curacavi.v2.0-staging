@@ -360,23 +360,23 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     }
 
     /* =============================== */
-    /*            FIRMAS               */
-    /* =============================== */
-    doc.moveDown(20);
+/*            FIRMAS               */
+/* =============================== */
 
-    // Firma Conductor (lado izquierdo)
-    doc.text("");
+// Fuerza espacio real bajo la tabla
+y += 80; // aumenta este valor si necesitas más separación
 
-    doc.moveDown(20);
-// Firma Conductor (lado izquierdo)
-    doc.text("_____________________________", 50, y);
-    doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
+// Firma Conductor
+doc.text("_____________________________", 50, y);
+doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
 
-    if (data.rut_conductor) doc.text(`RUT: ${data.rut_conductor}`, 50, y + 30);
+if (data.rut_conductor)
+  doc.text(`RUT: ${data.rut_conductor}`, 50, y + 30);
 
-    // Firma Supervisor (lado derecho)
-    doc.text("_____________________________", 320, y);
-    doc.text("Supervisor:", 330, y + 15);
+// Firma Supervisor
+doc.text("_____________________________", 320, y);
+doc.text("Supervisor:", 330, y + 15);
+
 
 
 
