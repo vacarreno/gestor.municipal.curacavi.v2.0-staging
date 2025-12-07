@@ -102,7 +102,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         .fontSize(14)
         .fillColor("#003366")
         .text("INFORME DE INSPECCIÓN VEHICULAR", L);
-
+doc.moveDown(1.5);
       doc
         .font("Helvetica")
         .fontSize(9)
@@ -192,7 +192,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         console.error("Error procesando imagen:", err);
       }
     }
-    doc.moveDown(10);
+    doc.moveDown(12);
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
     /* =============================== */
