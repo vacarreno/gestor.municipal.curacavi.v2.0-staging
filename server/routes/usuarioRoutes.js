@@ -268,4 +268,41 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
+/* ============================================================
+   === CAMBIO DE CONTRASEÑA PARA USUARIOS ADMINISTRADOS =======
+   ============================================================ */
+router.post("/:id/password", auth, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const { id } = req.params;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: "Nueva contraseña requerida." });
+    }
+
+    const exists = await db.query(
+      "SELECT id FROM usuarios WHERE id=$1",
+      [id]
+    );
+
+    if (!exists.rows.length) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 12);
+
+    await db.query(
+      "UPDATE usuarios SET password_hash=$1 WHERE id=$2",
+      [hash, id]
+    );
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+
+  } catch (err) {
+    console.error("❌ Error POST /usuarios/:id/password:", err);
+    res.status(500).json({ message: "Error interno" });
+  }
+});
+
+
 module.exports = router;
