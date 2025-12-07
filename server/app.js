@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const compression = require("compression");
 const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -62,9 +63,21 @@ app.options(/.*/, (req, res) => {
 });
 
 // ========================================================
-// =========== SERVIR FOTOS DE PERFIL (CORREGIDO) =========
+// =========== SERVIR FOTOS DE PERFIL (FIX DEFINITIVO) ====
 // ========================================================
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
+const uploadsPath = path.join(__dirname, "..", "uploads");
+
+// Crear carpeta si NO existe (Render sí permite dentro de /src/uploads)
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
+
+app.use("/uploads", express.static(uploadsPath));
+
+// Log de validación
+console.log("📂 UPLOADS PATH:", uploadsPath);
+console.log("📁 Exists:", fs.existsSync(uploadsPath));
 
 // ========================================================
 // ====================== ROUTER MAP ======================
@@ -103,6 +116,7 @@ app.get("/", (_, res) => {
     api: "Gestor Municipal API",
     env: NODE_ENV,
     db: process.env.DB_NAME,
+    uploadsPath,
     time: new Date().toISOString(),
   });
 });
@@ -122,9 +136,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
   console.log(`🌐 Entorno: ${NODE_ENV}`);
   console.log(`🌍 CORS permitido: ${allowedDomains.join(", ")}`);
-  console.log(`📂 Serving uploads desde:`, path.join(__dirname, "..", "uploads"));
-  console.log(`🔎 BASE_URL:`, process.env.BASE_URL);
-  console.log(`✅ Base de datos: ${process.env.DB_NAME}`);
+  console.log(`📂 Uploads path: ${uploadsPath}`);
+  console.log(`📌 DB usada: ${process.env.DB_NAME}`);
 });
 
 module.exports = app;
