@@ -198,7 +198,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
       }
     }
 
-    doc.moveDown(12);
+    doc.moveDown(15);
 
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
