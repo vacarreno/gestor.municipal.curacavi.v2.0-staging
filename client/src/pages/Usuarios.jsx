@@ -22,6 +22,8 @@ export default function Usuarios() {
     rol: "Usuario",
     password: "",
   });
+  const [showPassModal, setShowPassModal] = useState(false);
+  const [userIdPass, setUserIdPass] = useState(null);
 
   // ============================
   // RUT CHILE — VALIDACIÓN
@@ -166,10 +168,10 @@ export default function Usuarios() {
     setShowModal(true);
   };
 
- // ============================
-// Cambiar password
-// ============================
-const cambiarPassword = async (id) => {
+  // ============================
+  // Cambiar password
+  // ============================
+  /*const cambiarPassword = async (id) => {
   const nueva = prompt("Nueva contraseña:");
   if (!nueva) return;
 
@@ -179,8 +181,11 @@ const cambiarPassword = async (id) => {
   } catch (e) {
     alert("Error: " + (e.response?.data?.message || e.message));
   }
-};
- 
+};*/
+  const cambiarPassword = (id) => {
+    setUserIdPass(id);
+    setShowPassModal(true);
+  };
 
   // ============================
   // Eliminar
@@ -460,6 +465,11 @@ const cambiarPassword = async (id) => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <ModalChangePassword
+        show={showPassModal}
+        onHide={() => setShowPassModal(false)}
+        userId={userIdPass}
+      />
     </div>
   );
 }
