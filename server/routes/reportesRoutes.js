@@ -102,7 +102,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         .fontSize(14)
         .fillColor("#003366")
         .text("INFORME DE INSPECCIÓN VEHICULAR", L);
-doc.moveDown(1.5);
+      doc.moveDown(1.5);
       doc
         .font("Helvetica")
         .fontSize(9)
@@ -184,7 +184,12 @@ doc.moveDown(1.5);
           .fillColor("#003366")
           .text("Evidencia Fotográfica", L());
 
-        doc.image(tempPath, L(), doc.y, { width: 260 });
+        // Tamaño fijo de imagen
+        doc.image(tempPath, L(), doc.y, {
+          width: 260,
+          height: 180,
+          fit: [260, 180],
+        });
 
         await fs.unlink(tempPath);
         doc.moveDown(2);
@@ -192,7 +197,9 @@ doc.moveDown(1.5);
         console.error("Error procesando imagen:", err);
       }
     }
+
     doc.moveDown(12);
+
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
     /* =============================== */
@@ -358,15 +365,14 @@ doc.moveDown(1.5);
     doc.moveDown(10);
 
     // Firma Conductor (lado izquierdo)
-doc.text("_____________________________", 50, y);
-doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
+    doc.text("_____________________________", 50, y);
+    doc.text(`Conductor: ${data.conductor}`, 50, y + 15);
 
-if (data.rut_conductor)
-  doc.text(`RUT: ${data.rut_conductor}`, 50, y + 30);
+    if (data.rut_conductor) doc.text(`RUT: ${data.rut_conductor}`, 50, y + 30);
 
-// Firma Supervisor (lado derecho)
-doc.text("_____________________________", 320, y);
-doc.text("Supervisor:", 330, y + 15);
+    // Firma Supervisor (lado derecho)
+    doc.text("_____________________________", 320, y);
+    doc.text("Supervisor:", 330, y + 15);
 
     /* =============================== */
     /*          PAGINACIÓN             */
