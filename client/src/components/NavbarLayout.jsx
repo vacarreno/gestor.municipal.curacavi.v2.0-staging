@@ -23,7 +23,7 @@ export default function NavbarLayout() {
   const [showBilletera, setShowBilletera] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // USUARIO EN ESTADO (para que navbar actualice la foto)
+  // Usuario desde sessionStorage (mantiene persistencia)
   const [user, setUser] = useState(() =>
     JSON.parse(sessionStorage.getItem("user") || "{}")
   );
@@ -39,6 +39,7 @@ export default function NavbarLayout() {
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
 
+      {/* Botón hamburguesa */}
       {!navOpen && (
         <button
           className="hamburger btn btn-light"
@@ -57,6 +58,7 @@ export default function NavbarLayout() {
         </button>
       )}
 
+      {/* Sidebar */}
       <aside
         className={`sidebar ${navOpen ? "show" : ""}`}
         role="navigation"
@@ -222,22 +224,28 @@ export default function NavbarLayout() {
               )}
             </div>
           )}
-
         </nav>
       </aside>
 
+      {/* Fondo oscuro para cerrar menú */}
       <div
         className={`backdrop ${navOpen ? "show" : ""}`}
         onClick={() => setNavOpen(false)}
       />
 
+      {/* Contenido principal */}
       <div className="d-flex flex-column">
         <header className="header p-2 px-3 d-flex align-items-center justify-content-between border-bottom bg-light">
 
           <div className="d-flex align-items-center gap-3">
 
+            {/* FOTO USUARIO con cache-buster */}
             <img
-              src={user?.foto || "/default-user.png"}
+              src={
+                user?.foto
+                  ? `${user.foto}?v=${Date.now()}`
+                  : "/default-user.png"
+              }
               alt="Foto Usuario"
               onClick={() => setShowProfile(true)}
               style={{
@@ -246,10 +254,11 @@ export default function NavbarLayout() {
                 borderRadius: "50%",
                 objectFit: "cover",
                 cursor: "pointer",
-                border: "2px solid #ccc"
+                border: "2px solid #ccc",
               }}
             />
 
+            {/* Nombre + rol */}
             <div
               className="d-flex align-items-center gap-2 text-secondary fw-semibold"
               style={{ cursor: "pointer" }}
@@ -277,13 +286,12 @@ export default function NavbarLayout() {
         </footer>
       </div>
 
-      {/* Modal ahora recibe la función para actualizar el usuario */}
+      {/* Modal de perfil */}
       <UserProfileModal
         show={showProfile}
         onHide={() => setShowProfile(false)}
         onUserUpdate={setUser}
       />
-
     </div>
   );
 }
