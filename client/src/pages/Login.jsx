@@ -110,8 +110,8 @@ export default function Login() {
             src="/logo.png"
             alt="Logo Municipal"
             style={{
-              width: "80px",
-              height: "80px",
+              width: "150px",
+              height: "150px",
               objectFit: "contain",
               marginBottom: "10px",
             }}
