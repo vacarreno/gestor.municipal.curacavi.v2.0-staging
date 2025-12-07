@@ -362,7 +362,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     /* =============================== */
     /*            FIRMAS               */
     /* =============================== */
-    doc.moveDown(10);
+    doc.moveDown(20);
 
     // Firma Conductor (lado izquierdo)
     doc.text("_____________________________", 50, y);
