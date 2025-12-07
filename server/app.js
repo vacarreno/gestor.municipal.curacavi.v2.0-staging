@@ -41,6 +41,19 @@ app.use(
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+// ========================================================
+// ======= SERVIR FOTOS ANTES DEL MIDDLEWARE CORS =========
+// ========================================================
+app.use(
+  "/uploads",
+  express.static(
+    isProd
+      ? "/var/data/uploads"                // Render Disk persistente
+      : path.join(__dirname, "uploads")    // Carpeta local
+  )
+);
+console.log("📁 Servir /uploads desde:", isProd ? "/var/data/uploads" : path.join(__dirname, "uploads"));
+
 // =================== CORS ====================
 app.use(
   cors({
@@ -63,19 +76,6 @@ app.options(/.*/, (req, res) => {
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
   return res.sendStatus(204);
 });
-
-// ========================================================
-// ======= SERVIR FOTOS DESDE DISCO PERSISTENTE ===========
-// ========================================================
-app.use("/uploads", express.static("/var/data/uploads"));
-
-// ========================================================
-// === OPCIONAL: SERVIR LA CARPETA LOCAL EN DESARROLLO ====
-// ========================================================
-if (!isProd) {
-  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-  console.log("📁 Modo desarrollo: usando /uploads local");
-}
 
 // ========================================================
 // ====================== ROUTER MAP ======================
@@ -101,7 +101,7 @@ app.get("/", (_, res) => {
     env: NODE_ENV,
     baseUrl: process.env.BASE_URL,
     db: process.env.DB_NAME,
-    uploadsPath: "/var/data/uploads",
+    uploadsPath: isProd ? "/var/data/uploads" : path.join(__dirname, "uploads"),
     time: new Date().toISOString(),
   });
 });
@@ -121,7 +121,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
   console.log(`🌐 Entorno: ${NODE_ENV}`);
   console.log(`🌍 CORS permitido: ${allowedDomains.join(", ")}`);
-  console.log(`📸 Servir fotos desde: /var/data/uploads`);
+  console.log(`📸 Fotos desde: ${isProd ? "/var/data/uploads" : path.join(__dirname, "uploads")}`);
   console.log(`🌎 BASE_URL: ${process.env.BASE_URL}`);
   console.log(`✅ Base de datos: ${process.env.DB_NAME}`);
 });
