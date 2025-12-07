@@ -54,7 +54,10 @@ router.get("/", auth, async (_req, res) => {
 router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No se envió archivo" });
-
+// VALIDACIÓN — AGREGA ESTO
+    console.log("=== DEBUG SUBIDA FOTO ===");
+    console.log("BASE_URL:", process.env.BASE_URL);
+    console.log("FILENAME:", req.file.filename);
     const url = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
 
     await db.query(
