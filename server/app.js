@@ -62,9 +62,9 @@ app.options(/.*/, (req, res) => {
 });
 
 // ========================================================
-// =========== SERVIR FOTOS DE PERFIL (MUY IMPORTANTE) ====
+// =========== SERVIR FOTOS DE PERFIL (CORREGIDO) =========
 // ========================================================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 // ========================================================
 // ====================== ROUTER MAP ======================
@@ -77,8 +77,8 @@ app.use("/auth", require("./routes/authRoutes"));
 app.use("/usuarios", require("./routes/usuarioRoutes"));
 app.use("/conductores", require("./routes/conductorRoutes"));
 
-// --- Perfil / Foto Usuario (DEBE IR AQUÍ, NO AL FINAL) ---
-app.use("/users", require("./routes/userProfileRoutes"));  // ✔️ Corregido
+// --- Perfil / Foto Usuario ---
+app.use("/users", require("./routes/userProfileRoutes"));
 
 // --- Flota Vehicular ---
 app.use("/vehiculos", require("./routes/vehiculoRoutes"));
@@ -122,6 +122,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor activo en puerto ${PORT}`);
   console.log(`🌐 Entorno: ${NODE_ENV}`);
   console.log(`🌍 CORS permitido: ${allowedDomains.join(", ")}`);
+  console.log(`📂 Serving uploads desde:`, path.join(__dirname, "..", "uploads"));
+  console.log(`🔎 BASE_URL:`, process.env.BASE_URL);
   console.log(`✅ Base de datos: ${process.env.DB_NAME}`);
 });
 
