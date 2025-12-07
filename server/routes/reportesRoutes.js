@@ -6,7 +6,6 @@ const PDFDocument = require("pdfkit");
 const { db } = require("../config/db");
 const auth = require("../middleware/auth");
 
-
 const router = express.Router();
 
 /* ============================================================
@@ -121,23 +120,23 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     /* =============================== */
     /*     DATOS GENERALES INSPECCIÓN  */
     /* =============================== */
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica-Bold")
       .fillColor("#003366")
       .text("Datos de la Inspección", L());
     doc.fillColor("#000").fontSize(10);
 
     doc.text(`ID Inspección: ${id}`);
     doc.text(`Vehículo: ${data.vehiculo}`);
-    doc.text(
-      `Fecha: ${new Date(data.created_at).toLocaleString("es-CL")}`
-    );
+    doc.text(`Fecha: ${new Date(data.created_at).toLocaleString("es-CL")}`);
 
     doc.moveDown(1.2);
 
     /* =============================== */
     /*         DATOS CONDUCTOR         */
     /* =============================== */
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica-Bold")
       .fillColor("#003366")
       .text("Datos del Conductor", L());
     doc.fillColor("#000").fontSize(10);
@@ -156,11 +155,13 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     /* =============================== */
     /*         OBSERVACIONES           */
     /* =============================== */
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica-Bold")
       .fillColor("#003366")
       .text("Observaciones Generales", L());
 
-    doc.font("Helvetica")
+    doc
+      .font("Helvetica")
       .fillColor("#000")
       .text(data.observacion || "Sin observaciones registradas.");
 
@@ -177,7 +178,8 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         const tempPath = path.join("/tmp", `foto_${id}.jpg`);
         await fs.writeFile(tempPath, buffer);
 
-        doc.font("Helvetica-Bold")
+        doc
+          .font("Helvetica-Bold")
           .fillColor("#003366")
           .text("Evidencia Fotográfica", L());
 
@@ -189,7 +191,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
         console.error("Error procesando imagen:", err);
       }
     }
-     doc.moveDown(1.5);
+    doc.moveDown(3);
     /* =============================== */
     /*    ÍTEMS INSPECCIONADOS (PG)    */
     /* =============================== */
@@ -204,23 +206,57 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     const items = itemsResult.rows;
 
     const baseItems = [
-      "Luces de estacionamiento", "Luces bajas", "Luces altas",
-      "Luz de freno (incluye tercera luz)", "Luz de marcha atrás",
-      "Luz de viraje derecho", "Luz de viraje izquierdo",
-      "Luz de emergencia", "Luz de patente", "Baliza",
-      "Freno de mano", "Freno de pedal", "Freno otros",
-      "Neumático delantero derecho", "Neumático delantero izquierdo",
-      "Neumático trasero derecho", "Neumático trasero izquierdo",
-      "Neumático de repuesto", "Neumáticos otros", "Aceite de motor",
-      "Agua del radiador", "Líquido de freno", "Correas", "Agua de batería",
-      "Extintor", "Botiquín", "Gata", "Llave de ruedas", "Triángulos",
-      "Chaleco reflectante", "Limpia parabrisas", "Herramientas",
-      "Cinturón de seguridad", "Espejos laterales", "Espejo interior",
-      "Radiotransmisor", "Bocina de retroceso", "Antena",
-      "Permiso de circulación", "Revisión técnica", "Seguro obligatorio",
-      "Techo", "Capot", "Puertas", "Vidrios", "Tapabarros", "Pick-up",
-      "Parachoques", "Tubo de escape", "Aseo de cabina",
-      "Sanitización COVID-19"
+      "Luces de estacionamiento",
+      "Luces bajas",
+      "Luces altas",
+      "Luz de freno (incluye tercera luz)",
+      "Luz de marcha atrás",
+      "Luz de viraje derecho",
+      "Luz de viraje izquierdo",
+      "Luz de emergencia",
+      "Luz de patente",
+      "Baliza",
+      "Freno de mano",
+      "Freno de pedal",
+      "Freno otros",
+      "Neumático delantero derecho",
+      "Neumático delantero izquierdo",
+      "Neumático trasero derecho",
+      "Neumático trasero izquierdo",
+      "Neumático de repuesto",
+      "Neumáticos otros",
+      "Aceite de motor",
+      "Agua del radiador",
+      "Líquido de freno",
+      "Correas",
+      "Agua de batería",
+      "Extintor",
+      "Botiquín",
+      "Gata",
+      "Llave de ruedas",
+      "Triángulos",
+      "Chaleco reflectante",
+      "Limpia parabrisas",
+      "Herramientas",
+      "Cinturón de seguridad",
+      "Espejos laterales",
+      "Espejo interior",
+      "Radiotransmisor",
+      "Bocina de retroceso",
+      "Antena",
+      "Permiso de circulación",
+      "Revisión técnica",
+      "Seguro obligatorio",
+      "Techo",
+      "Capot",
+      "Puertas",
+      "Vidrios",
+      "Tapabarros",
+      "Pick-up",
+      "Parachoques",
+      "Tubo de escape",
+      "Aseo de cabina",
+      "Sanitización COVID-19",
     ];
 
     const merged = baseItems.map((b) => {
@@ -236,7 +272,8 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     /* =============================== */
     /*            TABLA                */
     /* =============================== */
-    doc.font("Helvetica-Bold")
+    doc
+      .font("Helvetica-Bold")
       .fillColor("#003366")
       .text("Ítems Inspeccionados", L());
 
@@ -250,7 +287,13 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
     const rowHeight = 18;
 
     const drawTableHeader = () => {
-      doc.rect(startX, y, colWidths.reduce((a, b) => a + b), rowHeight)
+      doc
+        .rect(
+          startX,
+          y,
+          colWidths.reduce((a, b) => a + b),
+          rowHeight
+        )
         .fillAndStroke("#003366", "#003366");
 
       doc.fillColor("#FFF").font("Helvetica-Bold").fontSize(10);
@@ -280,7 +323,13 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
 
       const bg = index % 2 === 0 ? "#F5F5F5" : "#FFFFFF";
 
-      doc.rect(startX, y, colWidths.reduce((a, b) => a + b), rowHeight)
+      doc
+        .rect(
+          startX,
+          y,
+          colWidths.reduce((a, b) => a + b),
+          rowHeight
+        )
         .fillAndStroke(bg, "#CCCCCC");
 
       let x = startX;
@@ -293,8 +342,7 @@ router.get("/inspeccion/:id/pdf", auth, async (req, res) => {
       doc.text(it.existe, x + 5, y + 4);
 
       x += colWidths[1];
-      const color =
-        it.estado === "Bueno" ? "#0A7F00" : "#A80000";
+      const color = it.estado === "Bueno" ? "#0A7F00" : "#A80000";
       doc.fillColor(color).text(it.estado, x + 5, y + 4);
 
       x += colWidths[2];
