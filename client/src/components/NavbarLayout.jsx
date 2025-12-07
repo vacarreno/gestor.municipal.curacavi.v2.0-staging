@@ -15,10 +15,13 @@ import {
   List
 } from "react-bootstrap-icons";
 
+import UserProfileModal from "../components/UserProfileModal";  // ← IMPORTANTE
+
 export default function NavbarLayout() {
   const [navOpen, setNavOpen] = useState(false);
-  const [showConfig, setShowConfig] = useState(false); 
-  const [showBilletera, setShowBilletera] = useState(false); 
+  const [showConfig, setShowConfig] = useState(false);
+  const [showBilletera, setShowBilletera] = useState(false);
+  const [showProfile, setShowProfile] = useState(false); // ← NECESARIO
 
   // === USUARIO LOGUEADO ===
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -34,7 +37,7 @@ export default function NavbarLayout() {
   return (
     <div className={`app-shell ${navOpen ? "nav-open" : ""}`}>
 
-      {/* BOTÓN MENÚ MÓVIL (Ahora se oculta si el menú está abierto) */}
+      {/* BOTÓN MENÚ MÓVIL */}
       {!navOpen && (
         <button
           className="hamburger btn btn-light"
@@ -118,7 +121,7 @@ export default function NavbarLayout() {
             </>
           )}
 
-          {/* === Conductores / Vehículos / Mantenciones / Reportes === */}
+          {/* === Conductores / Vehículos / Mantenciones === */}
           {(rol === "admin" || rol === "Supervisor") && (
             <>
               <NavLink
@@ -247,39 +250,38 @@ export default function NavbarLayout() {
 
           <div className="d-flex align-items-center gap-3">
 
-  {/* FOTO REAL DEL USUARIO */}
-  <img
-    src={user?.foto || "/default-user.png"}
-    alt="Foto Usuario"
-    onClick={() => setShowProfile(true)}
-    style={{
-      width: "36px",
-      height: "36px",
-      borderRadius: "50%",
-      objectFit: "cover",
-      cursor: "pointer",
-      border: "2px solid #ccc"
-    }}
-  />
+            {/* FOTO PERFIL */}
+            <img
+              src={user?.foto || "/default-user.png"}
+              alt="Foto Usuario"
+              onClick={() => setShowProfile(true)}
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                cursor: "pointer",
+                border: "2px solid #ccc"
+              }}
+            />
 
-  {/* NOMBRE + ROL */}
-  <div
-    className="d-flex align-items-center gap-2 text-secondary fw-semibold"
-    style={{ cursor: "pointer" }}
-    onClick={() => setShowProfile(true)}
-  >
-    {user?.nombre || user?.username || "Usuario"}
-    <span className="text-muted small">({rol})</span>
-  </div>
+            {/* NOMBRE + ROL */}
+            <div
+              className="d-flex align-items-center gap-2 text-secondary fw-semibold"
+              style={{ cursor: "pointer" }}
+              onClick={() => setShowProfile(true)}
+            >
+              {user?.nombre || user?.username || "Usuario"}
+              <span className="text-muted small">({rol})</span>
+            </div>
 
-  <button
-    className="btn btn-sm btn-outline-secondary"
-    onClick={handleLogout}
-  >
-    Cerrar sesión
-  </button>
-</div>
-
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              onClick={handleLogout}
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </header>
 
         <main className="content flex-grow-1">
@@ -290,6 +292,13 @@ export default function NavbarLayout() {
           © {new Date().getFullYear()} GESTOR MUNICIPAL — I. Municipalidad de Curacaví
         </footer>
       </div>
+
+      {/* === MODAL DE PERFIL === */}
+      <UserProfileModal
+        show={showProfile}
+        onHide={() => setShowProfile(false)}
+      />
+
     </div>
   );
 }
