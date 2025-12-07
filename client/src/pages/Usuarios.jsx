@@ -166,20 +166,21 @@ export default function Usuarios() {
     setShowModal(true);
   };
 
-  // ============================
-  // Cambiar password
-  // ============================
-  const cambiarPassword = async (id) => {
-    const nueva = prompt("Nueva contraseña:");
-    if (!nueva) return;
+ // ============================
+// Cambiar password
+// ============================
+const cambiarPassword = async (id) => {
+  const nueva = prompt("Nueva contraseña:");
+  if (!nueva) return;
 
-    try {
-      await api.put(`/usuarios/${id}/password`, { password: nueva });
-      alert("Contraseña actualizada");
-    } catch (e) {
-      alert("Error: " + e.message);
-    }
-  };
+  try {
+    await api.put(`/usuarios/${id}/password`, { newPassword: nueva });
+    alert("Contraseña actualizada");
+  } catch (e) {
+    alert("Error: " + (e.response?.data?.message || e.message));
+  }
+};
+ 
 
   // ============================
   // Eliminar
