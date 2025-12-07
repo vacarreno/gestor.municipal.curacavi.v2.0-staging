@@ -26,7 +26,7 @@ export default function UserProfileModal({ show, onHide, onUserUpdate }) {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
-      user.foto = res.data.url;
+      user.foto = res.data.url || "/default-user.png";
       sessionStorage.setItem("user", JSON.stringify(user));
 
       if (onUserUpdate) onUserUpdate({ ...user });

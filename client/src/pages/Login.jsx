@@ -33,8 +33,8 @@ export default function Login() {
   ============================================================ */
   const submit = async (e) => {
     e.preventDefault();
-
     if (loading) return;
+
     setError("");
 
     if (!username.trim() || !password.trim()) {
@@ -53,31 +53,25 @@ export default function Login() {
         return;
       }
 
-      /* --------------------------------------------------------
-         🔧 Normalizamos el usuario para garantizar .foto
-         (el backend debe enviar foto, pero si no lo hace,
-         evitamos que Navbar falle)
-      -------------------------------------------------------- */
+      /* ======================================================
+         NORMALIZAMOS USUARIO (incluye foto)
+      ====================================================== */
       const normalizedUser = {
-        id: data.user.id,
-        username: data.user.username,
-        nombre: data.user.nombre,
-        rol: data.user.rol,
-        foto: data.user.foto || "/default-user.png",
-        correo: data.user.correo || "",
-        departamento: data.user.departamento || "",
+        ...data.user,
+        foto: data.user.foto || "/default-user.png"
       };
 
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem("user", JSON.stringify(normalizedUser));
 
       nav("/dashboard", { replace: true });
+
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
-        (typeof err === "string" ? err : "Error al iniciar sesión");
+        "Error al iniciar sesión";
 
       if (msg.includes("CORS") || msg.includes("Failed to fetch")) {
         setError("El servidor no permite la conexión (CORS block).");
