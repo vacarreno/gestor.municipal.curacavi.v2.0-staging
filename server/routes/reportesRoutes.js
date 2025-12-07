@@ -355,7 +355,7 @@ doc.moveDown(1.5);
     /* =============================== */
     /*            FIRMAS               */
     /* =============================== */
-    doc.moveDown(3);
+    doc.moveDown(10);
 
     // Firma Conductor (lado izquierdo)
 doc.text("_____________________________", 50, y);
