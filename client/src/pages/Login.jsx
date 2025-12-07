@@ -11,7 +11,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Mensajes GET (?expired & ?unauth)
+  /* ============================================================
+     MENSAJES GET (?expired & ?unauth)
+  ============================================================ */
   useEffect(() => {
     const q = new URLSearchParams(search);
 
@@ -26,6 +28,9 @@ export default function Login() {
     }
   }, [search]);
 
+  /* ============================================================
+     SUBMIT LOGIN
+  ============================================================ */
   const submit = async (e) => {
     e.preventDefault();
 
@@ -48,19 +53,32 @@ export default function Login() {
         return;
       }
 
+      /* --------------------------------------------------------
+         🔧 Normalizamos el usuario para garantizar .foto
+         (el backend debe enviar foto, pero si no lo hace,
+         evitamos que Navbar falle)
+      -------------------------------------------------------- */
+      const normalizedUser = {
+        id: data.user.id,
+        username: data.user.username,
+        nombre: data.user.nombre,
+        rol: data.user.rol,
+        foto: data.user.foto || "/default-user.png",
+        correo: data.user.correo || "",
+        departamento: data.user.departamento || "",
+      };
+
       sessionStorage.setItem("token", data.token);
-      sessionStorage.setItem("user", JSON.stringify(data.user));
+      sessionStorage.setItem("user", JSON.stringify(normalizedUser));
 
       nav("/dashboard", { replace: true });
     } catch (err) {
-      // Normaliza mensaje de error
       const msg =
-        err?.response?.data?.message || 
+        err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
         (typeof err === "string" ? err : "Error al iniciar sesión");
 
-      // Caso típico CORS bloqueado en Render
       if (msg.includes("CORS") || msg.includes("Failed to fetch")) {
         setError("El servidor no permite la conexión (CORS block).");
       } else {
@@ -77,18 +95,16 @@ export default function Login() {
       style={{ background: "linear-gradient(135deg, #1E3A5F, #0A192F)" }}
     >
       <div
-  className="login-card bg-white p-4 rounded shadow-lg"
-  style={{
-    width: "100%",
-    maxWidth: "380px",
-    position: "fixed",       // ← fija la tarjeta
-    top: "50%",              // ← centro vertical real
-    left: "50%",             // ← centro horizontal real
-    transform: "translate(-50%, -50%)", // ← evita movimientos del DOM
-  }}
->
-
-        {/* LOGO */}
+        className="login-card bg-white p-4 rounded shadow-lg"
+        style={{
+          width: "100%",
+          maxWidth: "380px",
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
         <div className="text-center mb-3">
           <img
             src="/logo.png"
