@@ -33,6 +33,14 @@ const upload = multer({ storage });
 // ======================================
 router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
   try {
+    
+    // === LOGS DE DIAGNÓSTICO ===
+    console.log("========== UPLOAD DEBUG ==========");
+    console.log("Content-Type:", req.headers["content-type"]);
+    console.log("req.file:", req.file);
+    console.log("req.body:", req.body);
+    console.log("===================================");
+
     if (!req.file) {
       return res.status(400).json({ error: "No se envió archivo." });
     }
@@ -48,9 +56,6 @@ router.post("/upload-photo", auth, upload.single("foto"), async (req, res) => {
     res.json({ url: fileUrl });
 
   } catch (err) {
-    console.log("REQ FILE =>", req.file);
-    console.log("REQ BODY =>", req.body);
-
     console.error("❌ Error subiendo foto:", err);
     res.status(500).json({ error: "Error interno al subir foto" });
   }
